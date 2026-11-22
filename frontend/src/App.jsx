@@ -14,29 +14,39 @@ import { SuperAdminDashboardPage } from './pages/SuperAdminDashboardPage';
 import { ProductDetails } from './pages/ProductDetails';
 import { Checkout } from './pages/Checkout';
 import { MyAccount } from './pages/MyAccount';
+import { LegalPage } from './pages/LegalPage';
 import { resolveAuthorizedPage } from './utils/roleAccess';
+
+const LEGAL_PAGES = {
+  '/privacy-policy': 'privacy-policy',
+  '/terms-and-conditions': 'terms-and-conditions',
+  '/shipping-policy': 'shipping-policy',
+  '/returns-and-refunds': 'returns-and-refunds',
+};
+
+function pageFromPath(pathname) {
+  const path = pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  if (LEGAL_PAGES[path]) return LEGAL_PAGES[path];
+  if (/^\/products\/[^/]+\/?$/.test(path)) return 'product';
+  if (path === '/checkout') return 'checkout';
+  if (path === '/cart') return 'home';
+  if (path.startsWith('/account')) return 'account';
+  if (path === '/login') return 'login';
+  if (path === '/register') return 'register';
+  if (path === '/my-complaints') return 'my-complaints';
+  if (path === '/my-conversations') return 'my-conversations';
+  if (path === '/handler-dashboard' || path.startsWith('/handler')) return 'handler-dashboard';
+  if (path === '/admin-dashboard') return 'admin-dashboard';
+  if (path === '/admin' || path === '/super-admin-dashboard') return 'super-admin-dashboard';
+  return 'home';
+}
 
 function AppContent() {
   const { user, isAuthenticated, loading } = useAuth();
   const { setIsCartOpen } = useCart();
   const initialProductSlug = window.location.pathname.match(/^\/products\/([^/]+)\/?$/i)?.[1];
   const [productSlug, setProductSlug] = useState(() => initialProductSlug ? decodeURIComponent(initialProductSlug) : '');
-  const [currentPage, setCurrentPage] = useState(() => {
-    const path = window.location.pathname.toLowerCase();
-    if (/^\/products\/[^/]+\/?$/.test(path)) return 'product';
-    if (path === '/checkout') return 'checkout';
-    if (path === '/cart') return 'home';
-    if (path.startsWith('/account')) return 'account';
-    if (path === '/login') return 'login';
-    if (path === '/register') return 'register';
-    if (path === '/my-complaints') return 'my-complaints';
-    if (path === '/my-conversations') return 'my-conversations';
-    if (path === '/handler-dashboard' || path.startsWith('/handler')) return 'handler-dashboard';
-    if (path === '/admin-dashboard') return 'admin-dashboard';
-    if (path === '/admin') return 'super-admin-dashboard';
-    if (path === '/super-admin-dashboard') return 'super-admin-dashboard';
-    return 'home';
-  });
+  const [currentPage, setCurrentPage] = useState(() => pageFromPath(window.location.pathname));
   const [routePath, setRoutePath] = useState(() => window.location.pathname);
 
   useEffect(() => {
@@ -48,21 +58,10 @@ function AppContent() {
   useEffect(() => {
     const handlePopState = () => {
       setRoutePath(window.location.pathname);
-      const path = window.location.pathname.toLowerCase();
       const productMatch = window.location.pathname.match(/^\/products\/([^/]+)\/?$/i);
-      if (productMatch) { setProductSlug(decodeURIComponent(productMatch[1])); setCurrentPage('product'); }
-      else if (path === '/checkout') setCurrentPage('checkout');
-      else if (path === '/cart') { setIsCartOpen(true); setCurrentPage('home'); }
-      else if (path.startsWith('/account')) setCurrentPage('account');
-      else if (path === '/login') setCurrentPage('login');
-      else if (path === '/register') setCurrentPage('register');
-      else if (path === '/my-complaints') setCurrentPage('my-complaints');
-      else if (path === '/my-conversations') setCurrentPage('my-conversations');
-      else if (path === '/handler-dashboard' || path.startsWith('/handler')) setCurrentPage('handler-dashboard');
-      else if (path === '/admin-dashboard') setCurrentPage('admin-dashboard');
-      else if (path === '/admin') setCurrentPage('super-admin-dashboard');
-      else if (path === '/super-admin-dashboard') setCurrentPage('super-admin-dashboard');
-      else setCurrentPage('home');
+      if (productMatch) setProductSlug(decodeURIComponent(productMatch[1]));
+      if (window.location.pathname.toLowerCase() === '/cart') setIsCartOpen(true);
+      setCurrentPage(pageFromPath(window.location.pathname));
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -88,6 +87,7 @@ function AppContent() {
     if (page === 'handler-dashboard') targetPath = value || (window.location.pathname.startsWith('/handler/') ? window.location.pathname : '/handler/dashboard');
     if (page === 'admin-dashboard') targetPath = '/admin-dashboard';
     if (page === 'super-admin-dashboard') targetPath = '/super-admin-dashboard';
+    if (LEGAL_PAGES[`/${page}`]) targetPath = `/${page}`;
 
     if (window.location.pathname !== targetPath) {
       window.history.pushState({}, '', targetPath);
@@ -152,6 +152,10 @@ function AppContent() {
   if (authorizedPage === 'account') {
     const section = routePath.split('/')[2] || 'profile';
     return <MyAccount section={section} onNavigate={navigateTo} />;
+  }
+
+  if (LEGAL_PAGES[`/${authorizedPage}`]) {
+    return <LegalPage page={authorizedPage} onNavigate={navigateTo} />;
   }
 
   return <Home onNavigate={navigateTo} />;

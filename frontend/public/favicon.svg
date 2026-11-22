@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Flatkart</title>
+  <rect width="64" height="64" rx="15" fill="#122D29" />
+  <path d="M11 8h42v12H24v10h24v12H24v14H11z" fill="#F7F6F1" />
+  <path d="M39 8h14v4H39z" fill="#C2A15A" />
+</svg>
