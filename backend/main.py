@@ -19,7 +19,9 @@ os.environ.setdefault("LANGGRAPH_STRICT_MSGPACK", "true")
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import inspect
+
+from sqlalchemy import inspect
+
 from backend.api.routes.auth import router as auth_router
 from backend.api.routes.admin import router as admin_router
 from backend.api.routes.classifier import router as classifier_router
@@ -80,7 +82,7 @@ def _recover_pending_chat_deletions(checkpointer):
 @asynccontextmanager
 async def lifespan(_app):
     if APP_ENV == "production":
-        if not not inspect(engine).has_table(LoginThrottle.__tablename__):
+        if not inspect(engine).has_table(LoginThrottle.__tablename__):
             raise RuntimeError(
                 "The login lockout table must exist before production startup."
             )
