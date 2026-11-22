@@ -310,7 +310,12 @@ jobs:
 
           REMOTE_SCRIPT=$(printf '%s' "$REMOTE_SCRIPT" | sed "s/__TARGET_SHA__/$TARGET_SHA/g")
 
-          PARAMETERS=$(jq -n --arg command "$REMOTE_SCRIPT" '{commands: [$command]}')
+          # SSM uses /bin/sh by default. Decode and explicitly execute with Bash.
+          REMOTE_SCRIPT_B64=$(printf '%s' "$REMOTE_SCRIPT" | base64 -w 0)
+
+          PARAMETERS=$(jq -n \
+            --arg command "printf '%s' '$REMOTE_SCRIPT_B64' | base64 -d | bash" \
+            '{commands: [$command]}')
 
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
