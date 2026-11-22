@@ -147,7 +147,7 @@ jobs:
           echo "========== BUILD FRONTEND =========="
 
           sudo -u ubuntu bash -lc \
-            "cd '$RELEASE_DIR/frontend' && npm ci && npm run build"
+            "cd '$RELEASE_DIR/frontend' && npm install --no-audit --no-fund && npm run build"
 
           test -s "$RELEASE_DIR/frontend/dist/index.html"
 
