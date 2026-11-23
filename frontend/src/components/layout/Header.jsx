@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, ShoppingCart, Package, Heart, LogOut, LogIn, ChevronDown, MessageSquare, UserRound, Headphones, MapPin } from 'lucide-react';
+import { Search, ShoppingCart, Package, Heart, LogOut, LogIn, ChevronDown, MessageSquare, UserRound, Headphones, Home } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useAddressBook } from '../../context/AddressContext';
@@ -24,8 +24,8 @@ export function Header({ onOpenAuth, onSelectProduct, onNavigate }) {
   const userMenuRef = useRef(null);
 
   const addressLabel = selectedAddress
-    ? `${selectedAddress.label || 'Home'} · ${[selectedAddress.locality, selectedAddress.city, selectedAddress.pin_code].filter(Boolean).join(', ') || selectedAddress.pin_code}`
-    : (isAuthenticated ? 'Select delivery address' : 'Deliver to · Choose location');
+    ? `Home · ${[selectedAddress.locality, selectedAddress.city, selectedAddress.pin_code].filter(Boolean).join(', ') || selectedAddress.pin_code}`
+    : (isAuthenticated ? 'Home · Select delivery address' : 'Home · Deliver to · Choose location');
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -114,7 +114,7 @@ export function Header({ onOpenAuth, onSelectProduct, onNavigate }) {
         aria-label="Choose delivery location"
       >
         <div className="fk-header-delivery-content">
-          <MapPin size={15} strokeWidth={2.4} className="fk-header-delivery-icon" />
+          <Home size={15} strokeWidth={2.2} className="fk-header-delivery-icon" />
           <span className="fk-header-delivery-text">{addressLabel}</span>
         </div>
         <ChevronDown size={14} strokeWidth={2.2} />
@@ -317,23 +317,18 @@ export function Header({ onOpenAuth, onSelectProduct, onNavigate }) {
           </div>
         )}
 
-        {/* Orders */}
-        <button
-          className="fk-header-nav-link"
-          onClick={handleOrdersClick}
-          aria-label="Orders and Complaints"
-        >
-          Orders
-        </button>
+        {/* Orders - only for authenticated users per requirement A2 */}
+        {isAuthenticated && (
+          <button
+            className="fk-header-nav-link"
+            onClick={handleOrdersClick}
+            aria-label="Orders and Complaints"
+          >
+            Orders
+          </button>
+        )}
 
-        {/* Wishlist */}
-        <button
-          className="fk-header-nav-link wishlist-link"
-          onClick={() => setIsWishlistOpen(true)}
-          aria-label="Wishlist"
-        >
-          Wishlist
-        </button>
+        {/* Note: Wishlist is removed from primary nav per requirement A1; remains in Account */}
 
         {/* Functional Cart Button */}
         <button

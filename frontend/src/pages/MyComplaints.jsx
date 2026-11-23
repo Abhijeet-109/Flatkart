@@ -332,6 +332,7 @@ export function MyComplaints({ onNavigate }) {
           isOpen={isChatbotOpen}
           onToggle={() => setIsChatbotOpen(!isChatbotOpen)}
           onNavigate={onNavigate}
+          currentPage="account"
         />
 
         {/* Drawers & Modals */}

@@ -83,7 +83,7 @@ function AppContent() {
       setIsCartOpen(true);
       return;
     }
-    if (page === 'account') targetPath = `/account/${value || 'profile'}`;
+    if (page === 'account') targetPath = value ? `/account/${value}` : '/account/overview';
     if (page === 'login') targetPath = '/login';
     if (page === 'register') targetPath = '/register';
     if (page === 'my-complaints') targetPath = '/my-complaints';
@@ -168,7 +168,7 @@ function AppContent() {
     }
 
     if (authorizedPage === 'account') {
-      const section = routePath.split('/')[2] || 'profile';
+      const section = routePath.split('/')[2] || 'overview';
       return <MyAccount section={section} onNavigate={navigateTo} />;
     }
 

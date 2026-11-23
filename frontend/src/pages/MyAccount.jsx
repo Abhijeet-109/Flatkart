@@ -99,7 +99,6 @@ function AccountSection({ section, onProfileSaved, onNavigate }) {
       </button>
 
       <h1 className="fk-account-title">{title}</h1>
-      <p className="fk-account-subtitle">Manage your Flatkart account information.</p>
       {notice.text && (
         <p
           role={notice.type === 'error' ? 'alert' : 'status'}
@@ -310,39 +309,18 @@ function AccountSection({ section, onProfileSaved, onNavigate }) {
 
       {!loading && section === 'payments' && (
         <div className="fk-account-card">
-          <h2 style={{ marginTop: 0, fontSize: '17px', fontWeight: '700' }}>Preferred payment method</h2>
-          <p style={{ fontSize: '13.5px', color: 'var(--fk-text-muted)', lineHeight: 1.45 }}>
-            Choose a preference. Checkout shows only methods supported by every item in your order and your current payment configuration.
+          <h2 style={{ marginTop: 0, fontSize: '17px', fontWeight: '700' }}>Payment Methods</h2>
+          <p style={{ fontSize: '13.5px', color: 'var(--fk-text-muted)', lineHeight: 1.5, marginTop: '8px' }}>
+            Flatkart supports Cash on Delivery, UPI through Razorpay, and Net Banking at checkout.
           </p>
-          <label className="fk-account-field">
-            Preference
-            <select className="fk-account-input" value={preference} onChange={(e) => setPreference(e.target.value)}>
-              <option value="">No preference</option>
-              <option value="cod">Cash on Delivery</option>
-              <option value="upi">UPI through Razorpay</option>
-              <option value="netbanking">Net Banking through Razorpay</option>
-            </select>
-          </label>
-          <button
-            className="fk-checkout-submit"
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                await accountService.savePaymentPreference(preference || null);
-                notify('success', 'Payment preference saved.');
-              } catch (error) {
-                notify('error', error.message || 'Preference could not be saved.');
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            Save preference
-          </button>
-          <p style={{ marginTop: 12, marginBottom: 0, color: 'var(--fk-text-muted)', fontSize: '12px' }}>
-            Payment credentials and non-tokenized instruments are never stored in your account.
-          </p>
+          <div style={{ marginTop: '16px', padding: '14px 16px', backgroundColor: 'var(--fk-background, #F4F1EA)', borderRadius: '8px', fontSize: '13px', color: 'var(--fk-text-primary)' }}>
+            <p style={{ margin: 0, fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>🔒</span> Secure Payments
+            </p>
+            <p style={{ margin: '6px 0 0', color: 'var(--fk-text-muted)', fontSize: '12px', lineHeight: 1.45 }}>
+              Payment credentials and non-tokenized instruments are never stored on your account. Choose your preferred method seamlessly during checkout.
+            </p>
+          </div>
         </div>
       )}
     </section>
@@ -439,7 +417,7 @@ export function MyAccount({ section = 'overview', onNavigate }) {
           onNavigate={onNavigate}
         />
       ) : validSection === 'support-tickets' ? (
-        <AccountSupportTickets />
+        <AccountSupportTickets onNavigate={onNavigate} />
       ) : (
         <section style={{ padding: 28 }}>
           <h1>Wishlist</h1>
@@ -449,7 +427,7 @@ export function MyAccount({ section = 'overview', onNavigate }) {
     </AccountLayout>
     <WishlistDrawer onNavigate={onNavigate} />
     <CartDrawer onNavigate={onNavigate} />
-    <ChatbotWidget isOpen={chatOpen} onToggle={() => setChatOpen((open) => !open)} onNavigate={onNavigate} />
+    <ChatbotWidget isOpen={chatOpen} onToggle={() => setChatOpen((open) => !open)} onNavigate={onNavigate} currentPage="account" />
   </>;
 }
 

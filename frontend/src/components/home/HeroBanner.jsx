@@ -164,7 +164,7 @@ export function HeroBanner({ onExplore }) {
             left: '35px',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
+            gap: '7px',
             zIndex: 20,
           }}
           role="tablist"
@@ -178,9 +178,9 @@ export function HeroBanner({ onExplore }) {
               aria-selected={currentSlide === idx}
               role="tab"
               style={{
-                width: currentSlide === idx ? '26px' : '9px',
-                height: '9px',
-                borderRadius: '5px',
+                width: currentSlide === idx ? '18px' : '6px',
+                height: '6px',
+                borderRadius: '3px',
                 backgroundColor:
                   currentSlide === idx ? 'var(--fk-gold)' : 'rgba(255, 255, 255, 0.45)',
                 border: 'none',

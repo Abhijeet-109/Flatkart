@@ -180,7 +180,7 @@ export function ProductDetails({ slug, onNavigate }) {
     finally { setPinLoading(false); }
   };
 
-  return <div className="fk-page-container">
+  return <div className="fk-page-container fk-product-details-container">
     <Header onNavigate={onNavigate} onSelectProduct={(item) => onNavigate('product', item.slug)} />
     <main className="fk-product-detail-page">
       {state.loading ? <div role="status" className="fk-catalog-state">Loading product…</div>

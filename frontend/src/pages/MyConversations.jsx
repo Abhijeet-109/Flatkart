@@ -117,6 +117,8 @@ export function MyConversations({ onNavigate }) {
   // Dropdown & modal states
   const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [rowActionThreadId, setRowActionThreadId] = useState(null);
+  const [deleteTargetThreadId, setDeleteTargetThreadId] = useState(null);
 
   // Custom delete confirmation modal & in-app toast states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -571,26 +573,30 @@ export function MyConversations({ onNavigate }) {
   // 5. Delete conversation (Open custom confirmation modal)
   const handleDeleteConversation = () => {
     if (!activeThreadId) return;
+    setDeleteTargetThreadId(activeThreadId);
     setIsOptionsMenuOpen(false);
     setIsDeleteModalOpen(true);
   };
 
   const confirmDeleteConversation = async () => {
-    if (!activeThreadId) return;
-    const threadToDelete = activeThreadId;
+    const threadToDelete = deleteTargetThreadId || activeThreadId;
+    if (!threadToDelete) return;
     setIsDeleting(true);
     try {
       await chatbotService.deleteConversation(threadToDelete);
       const remaining = conversations.filter((c) => c.thread_id !== threadToDelete);
       setConversations(remaining);
 
-      if (remaining.length > 0) {
-        setActiveThreadId(remaining[0].thread_id);
-      } else {
-        setActiveThreadId(null);
-        setMessages([]);
+      if (threadToDelete === activeThreadId) {
+        if (remaining.length > 0) {
+          setActiveThreadId(remaining[0].thread_id);
+        } else {
+          setActiveThreadId(null);
+          setMessages([]);
+        }
       }
       setIsDeleteModalOpen(false);
+      setDeleteTargetThreadId(null);
       showToast('Conversation deleted successfully', 'success');
     } catch (err) {
       showToast(`Could not delete conversation: ${err.message}`, 'error');
@@ -600,23 +606,37 @@ export function MyConversations({ onNavigate }) {
   };
 
   // 6. Download conversation transcript
-  const handleDownloadTranscript = () => {
-    if (!messages.length) {
+  const handleDownloadTranscriptForThread = async (targetThreadId) => {
+    const threadId = targetThreadId || activeThreadId;
+    if (!threadId) return;
+
+    let msgs = messages;
+    if (threadId !== activeThreadId) {
+      try {
+        const historyData = await chatbotService.getConversationMessages(threadId);
+        msgs = historyData?.messages || [];
+      } catch (e) {
+        showToast('Could not load messages for download.', 'error');
+        return;
+      }
+    }
+
+    if (!msgs.length) {
       showToast('There are no messages in this conversation to download.', 'warning');
       return;
     }
 
-    const currentConv = conversations.find((c) => c.thread_id === activeThreadId);
+    const currentConv = conversations.find((c) => c.thread_id === threadId);
     const title = currentConv?.title || 'Flatkart Assistant Conversation';
 
     let content = `====================================================\n`;
     content += `FLATKART AI ASSISTANT - CONVERSATION TRANSCRIPT\n`;
     content += `Title: ${title}\n`;
     content += `Date: ${new Date().toLocaleString()}\n`;
-    content += `Thread ID: ${activeThreadId || 'N/A'}\n`;
+    content += `Thread ID: ${threadId}\n`;
     content += `====================================================\n\n`;
 
-    messages.forEach((msg) => {
+    msgs.forEach((msg) => {
       const sender = msg.role === 'assistant' ? 'Flatkart Assistant' : (user?.name || 'Customer');
       content += `[${sender}]:\n${msg.content}\n\n`;
       if (msg.sources && msg.sources.length > 0) {
@@ -628,13 +648,17 @@ export function MyConversations({ onNavigate }) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `flatkart-chat-${(activeThreadId || 'new').slice(0, 8)}.txt`;
+    link.download = `flatkart-chat-${threadId.slice(0, 8)}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     setIsOptionsMenuOpen(false);
     showToast('Conversation transcript downloaded successfully', 'success');
+  };
+
+  const handleDownloadTranscript = () => {
+    handleDownloadTranscriptForThread(activeThreadId);
   };
 
   // Voice input toggle (Web Speech API)
@@ -782,33 +806,79 @@ export function MyConversations({ onNavigate }) {
                     const previewText = conv.last_message || (conv.title === 'New chat' ? 'Start a conversation...' : conv.title);
 
                     return (
-                      <button
+                      <div
                         key={conv.thread_id}
-                        className={`fk-conv-item ${isSelected ? 'active' : ''}`}
-                        onClick={() => {
-                          setActiveThreadId(conv.thread_id);
-                          setLastFailedRequest(null);
-                          setIsSidebarOpen(false);
-                        }}
-                        aria-selected={isSelected}
+                        className={`fk-conv-item-wrapper ${isSelected ? 'active' : ''}`}
                       >
-                        <div className="fk-conv-item-icon">
-                          <MessageSquare size={17} strokeWidth={isSelected ? 2.2 : 1.8} />
-                        </div>
-                        <div className="fk-conv-item-content">
-                          <div className="fk-conv-item-header">
-                            <span className="fk-conv-item-title" title={conv.title}>
-                              {conv.title || 'New chat'}
-                            </span>
-                            {dateDisplay && (
-                              <span className="fk-conv-item-date">{dateDisplay}</span>
-                            )}
+                        <button
+                          type="button"
+                          className={`fk-conv-item ${isSelected ? 'active' : ''}`}
+                          onClick={() => {
+                            setActiveThreadId(conv.thread_id);
+                            setLastFailedRequest(null);
+                            setIsSidebarOpen(false);
+                          }}
+                          aria-selected={isSelected}
+                        >
+                          <div className="fk-conv-item-icon">
+                            <MessageSquare size={17} strokeWidth={isSelected ? 2.2 : 1.8} />
                           </div>
-                          <span className="fk-conv-item-preview" title={previewText}>
-                            {previewText}
-                          </span>
+                          <div className="fk-conv-item-content">
+                            <div className="fk-conv-item-header">
+                              <span className="fk-conv-item-title" title={conv.title}>
+                                {conv.title || 'New chat'}
+                              </span>
+                              {dateDisplay && (
+                                <span className="fk-conv-item-date">{dateDisplay}</span>
+                              )}
+                            </div>
+                            <span className="fk-conv-item-preview" title={previewText}>
+                              {previewText}
+                            </span>
+                          </div>
+                        </button>
+                        <div className="fk-conv-item-actions">
+                          <button
+                            type="button"
+                            className="fk-conv-row-more-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setRowActionThreadId(rowActionThreadId === conv.thread_id ? null : conv.thread_id);
+                            }}
+                            title="More options"
+                            aria-label="More options"
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          {rowActionThreadId === conv.thread_id && (
+                            <div className="fk-conv-row-dropdown" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                className="fk-conv-row-dropdown-item"
+                                onClick={() => {
+                                  setRowActionThreadId(null);
+                                  handleDownloadTranscriptForThread(conv.thread_id);
+                                }}
+                              >
+                                <Download size={14} />
+                                <span>Download transcript</span>
+                              </button>
+                              <button
+                                type="button"
+                                className="fk-conv-row-dropdown-item is-danger"
+                                onClick={() => {
+                                  setRowActionThreadId(null);
+                                  setDeleteTargetThreadId(conv.thread_id);
+                                  setIsDeleteModalOpen(true);
+                                }}
+                              >
+                                <Trash2 size={14} />
+                                <span>Delete conversation</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      </button>
+                      </div>
                     );
                   })
                 )}
@@ -859,65 +929,6 @@ export function MyConversations({ onNavigate }) {
                   >
                     <SquarePen size={17} strokeWidth={1.8} />
                   </button>
-
-                  <button
-                    className="fk-chat-action-btn delete-btn"
-                    onClick={handleDeleteConversation}
-                    disabled={!activeThreadId}
-                    title="Delete conversation"
-                    aria-label="Delete conversation"
-                  >
-                    <Trash2 size={17} strokeWidth={1.8} />
-                  </button>
-
-                  <button
-                    className="fk-chat-action-btn"
-                    onClick={handleDownloadTranscript}
-                    disabled={!messages.length}
-                    title="Download conversation transcript"
-                    aria-label="Download conversation transcript"
-                  >
-                    <Download size={17} strokeWidth={1.8} />
-                  </button>
-
-                  <button
-                    className="fk-chat-action-btn"
-                    onClick={() => setIsOptionsMenuOpen((prev) => !prev)}
-                    title="More actions"
-                    aria-label="More actions"
-                  >
-                    <MoreVertical size={17} strokeWidth={1.8} />
-                  </button>
-
-                  {isOptionsMenuOpen && (
-                    <div className="fk-chat-menu-dropdown">
-                      <button
-                        className="fk-chat-menu-item"
-                        onClick={() => {
-                          setIsOptionsMenuOpen(false);
-                          handleNewConversation();
-                        }}
-                      >
-                        <Plus size={14} /> New Conversation
-                      </button>
-                      <button
-                        className="fk-chat-menu-item"
-                        onClick={handleDownloadTranscript}
-                        disabled={!messages.length}
-                      >
-                        <Download size={14} /> Export Transcript
-                      </button>
-                      {activeThreadId && (
-                        <button
-                          className="fk-chat-menu-item"
-                          style={{ color: '#D32F2F' }}
-                          onClick={handleDeleteConversation}
-                        >
-                          <Trash2 size={14} /> Delete Conversation
-                        </button>
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -982,12 +993,6 @@ export function MyConversations({ onNavigate }) {
                           key={index}
                           className={`fk-chat-msg-row ${isUser ? 'user' : 'assistant'}`}
                         >
-                          {!isUser && (
-                            <div className="fk-chat-avatar-small" style={{ width: 30, height: 30 }}>
-                              <Bot size={16} strokeWidth={2} />
-                            </div>
-                          )}
-
                           <div className={isUser ? 'fk-chat-user-bubble' : 'fk-chat-assistant-bubble'}>
                             {isUser ? (
                               <span>{msg.content}</span>

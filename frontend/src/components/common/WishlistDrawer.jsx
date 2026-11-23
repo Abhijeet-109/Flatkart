@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { getProductCardImage } from '../../utils/productImages';
 
 const fallbackImg = '/assets/cat_men_hi.jpg';
 
 function WishlistItemRow({ item, onNavigate, onToggleWishlist, onCloseDrawer }) {
-  const initialImg = item.images?.[0]?.url || item.image || fallbackImg;
+  const initialImg = getProductCardImage(item) || item.images?.[0]?.url || item.image || fallbackImg;
   const [imgSrc, setImgSrc] = useState(initialImg);
+
+  useEffect(() => {
+    setImgSrc(getProductCardImage(item) || item.images?.[0]?.url || item.image || fallbackImg);
+  }, [item]);
   const targetSlug = item.slug || (item.name ? item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : item.id);
 
   const handleOpenProduct = () => {

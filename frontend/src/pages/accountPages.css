@@ -2016,6 +2016,67 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
+.fk-account-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--fk-text-primary, #1c352f);
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.fk-account-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #D8D4C8;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--fk-text-primary, #1c352f);
+  background-color: #FFFFFF;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.fk-account-input:focus {
+  border-color: var(--fk-gold);
+  box-shadow: 0 0 0 2px rgba(194, 161, 90, 0.2);
+}
+
+.fk-account-input.is-readonly {
+  background-color: #F8F7F3;
+  color: var(--fk-text-muted);
+  cursor: not-allowed;
+}
+
+.fk-password-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.fk-password-control .fk-account-input {
+  padding-right: 44px;
+}
+
+.fk-password-control button {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  color: #70797B;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
 @media (max-width: 768px) {
   .fk-account-sidebar {
     display: none !important;
@@ -2023,5 +2084,17 @@
   .fk-account-layout {
     grid-template-columns: 1fr !important;
     gap: 0 !important;
+  }
+  .fk-address-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .fk-saved-address-card {
+    width: 100% !important;
+  }
+  .fk-account-page.fk-support-page {
+    padding: 14px 12px 32px;
+  }
+  .fk-ticket-card {
+    padding: 14px;
   }
 }

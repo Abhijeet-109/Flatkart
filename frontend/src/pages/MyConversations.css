@@ -1347,14 +1347,136 @@
     display: none;
   }
 
-  .fk-chat-input-bar {
-    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-    background: #FFFFFF;
+  .fk-chat-input-area {
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .fk-chat-input {
-    font-size: 15px;
+  .fk-chat-input-pill {
+    width: 100%;
+    max-width: 100%;
+    padding: 3px 6px 3px 10px;
+    gap: 4px;
+    box-sizing: border-box;
   }
+
+  .fk-chat-text-input {
+    min-width: 0;
+    flex: 1 1 0%;
+    padding: 6px 6px;
+    font-size: 13.5px;
+  }
+
+  .fk-chat-attach-btn,
+  .fk-chat-mic-btn {
+    flex-shrink: 0;
+    padding: 6px;
+    margin: 0;
+  }
+
+  .fk-chat-send-btn {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+  }
+}
+
+.fk-conv-item-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  transition: background-color 0.15s ease;
+}
+
+.fk-conv-item-wrapper:hover {
+  background-color: #F8F9F5;
+}
+
+.fk-conv-item-wrapper.active {
+  background-color: #EEF3E9;
+  border-left: 3px solid #758552;
+  border-radius: 0 10px 10px 0;
+}
+
+.fk-conv-item-wrapper .fk-conv-item {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+}
+
+.fk-conv-item-wrapper.active .fk-conv-item {
+  border-left: none;
+}
+
+.fk-conv-item-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-right: 6px;
+}
+
+.fk-conv-row-more-btn {
+  background: transparent;
+  border: none;
+  color: #70797B;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.fk-conv-row-more-btn:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #1C352F;
+}
+
+.fk-conv-row-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 6px;
+  background: #FFFFFF;
+  border: 1px solid #ECE7DE;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 1200;
+  min-width: 175px;
+  padding: 4px 0;
+  animation: fadeIn 0.15s ease;
+}
+
+.fk-conv-row-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #1C352F;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.fk-conv-row-dropdown-item:hover {
+  background-color: #F8F7F3;
+}
+
+.fk-conv-row-dropdown-item.is-danger {
+  color: #D32F2F;
+}
+
+.fk-conv-row-dropdown-item.is-danger:hover {
+  background-color: #FFF2F2;
 }
 
 @media (max-width: 640px) {

@@ -31,7 +31,7 @@ export function CategoriesPage({ onNavigate }) {
   return (
     <div className="fk-page-container fk-categories-page">
       <Header onNavigate={onNavigate} />
-      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px', minHeight: '60vh' }}>
+      <main className="fk-categories-main">
         <CategorySection
           onSelectCategory={handleSelectCategory}
           categories={categories}
