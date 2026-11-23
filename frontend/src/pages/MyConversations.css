@@ -1216,6 +1216,55 @@
 .fk-return-intake-previews > div { display: grid; gap: 4px; width: 118px; font-size: 11px; overflow-wrap: anywhere; }
 .fk-return-intake-previews img { width: 118px; height: 90px; border-radius: 8px; border: 1px solid #d8ded6; object-fit: contain; background: #f1f0eb; }
 
+@media (max-width: 960px) {
+  .fk-conversations-panels {
+    grid-template-columns: 280px 1fr;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .fk-conversations-main {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .fk-conversations-panels {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    gap: 16px;
+    overflow: visible;
+  }
+
+  .fk-conv-left-panel {
+    width: 100%;
+    max-height: 230px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .fk-conv-right-panel {
+    width: 100%;
+    min-height: 480px;
+    height: 65vh;
+  }
+
+  .fk-chat-header {
+    padding: 10px 14px;
+  }
+
+  .fk-chat-input-bar {
+    padding: 8px 12px;
+  }
+
+  .fk-chat-input {
+    font-size: 14px;
+  }
+}
+
 @media (max-width: 640px) {
   .fk-return-intake-panel { padding: 14px; }
   .fk-return-intake-summary > div { grid-template-columns: 90px minmax(0, 1fr); }

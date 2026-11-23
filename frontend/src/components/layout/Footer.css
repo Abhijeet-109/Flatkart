@@ -124,6 +124,11 @@
   }
 }
 
+@media (max-width: 420px) {
+  .fk-site-footer { padding: 30px 14px 16px; }
+  .fk-site-footer-main { gap: 22px 12px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fk-site-footer-nav a { transition: none; }
 }

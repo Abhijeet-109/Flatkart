@@ -22,9 +22,9 @@ export function WhyFlatkart() {
       </div>
 
       <div
+        className="fk-why-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
           gap: '16px',
         }}
       >

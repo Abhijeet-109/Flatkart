@@ -1628,16 +1628,95 @@
   }
 }
 
-@media (max-width: 520px) {
-  .fk-pre-delivery-product {
+@media (max-width: 640px) {
+  .fk-orders-container {
+    padding: 12px 10px 32px;
+  }
+
+  .fk-orders-header-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 14px;
+    gap: 12px;
+  }
+
+  .fk-orders-title {
+    font-size: 22px;
+  }
+
+  .fk-nav-order-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fk-order-card-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .fk-order-summary-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fk-order-summary-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fk-order-card-body {
+    padding: 16px 12px;
+  }
+
+  .fk-pre-delivery-main-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .fk-tracking-modal-content,
+  .fk-cancel-modal-content {
+    width: min(540px, calc(100vw - 20px));
+    max-height: 85vh;
+  }
+
+  .fk-account-page {
+    padding: 16px 12px 32px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .fk-page-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .fk-ticket-top {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .fk-ticket-meta {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 520px) {
+  .fk-pre-delivery-product {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
   }
 
   .fk-pre-delivery-product .fk-product-image-box {
-    width: 100%;
-    height: 160px;
+    width: 80px;
+    height: 80px;
+    padding: 6px;
+    border-radius: 8px;
+    flex-shrink: 0;
   }
 
   .fk-pre-delivery-notice {

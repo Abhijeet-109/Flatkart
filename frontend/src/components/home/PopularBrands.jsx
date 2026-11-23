@@ -13,9 +13,9 @@ export function PopularBrands({ onSelectBrand, products = [] }) {
       </div>
 
       <div
+        className="fk-brands-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
           gap: '14px',
         }}
       >
