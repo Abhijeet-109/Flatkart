@@ -909,11 +909,7 @@ export function MyConversations({ onNavigate }) {
                   <div className="fk-chat-header-titles">
                     <div className="fk-chat-header-title-row">
                       <span className="fk-chat-header-name">Ryan</span>
-                      <span className="fk-chat-ai-badge">AI</span>
                     </div>
-                    <span className="fk-chat-header-desc">
-                      Your AI shopping and support companion
-                    </span>
                   </div>
                 </div>
 

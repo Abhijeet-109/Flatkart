@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Package,
   Heart,
@@ -36,6 +36,49 @@ export function AccountBottomSheet({ isOpen, onClose, onNavigate, onOpenWishlist
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
+
+  // Touch swipe gestures
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+  const touchDeltaX = useRef(0);
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length !== 1) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchDeltaX.current = 0;
+  };
+
+  const handleTouchMove = (e) => {
+    if (touchStartX.current === null) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const diffX = currentX - touchStartX.current;
+    const diffY = currentY - touchStartY.current;
+
+    // Detect intentional horizontal swipes
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      touchDeltaX.current = diffX;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current === null) return;
+    const diffX = touchDeltaX.current;
+    const threshold = 40; // minimum 40px to trigger panel change
+
+    if (diffX < -threshold) {
+      // Swiped left -> show Panel 2
+      setActivePanel(2);
+    } else if (diffX > threshold) {
+      // Swiped right -> return to Panel 1
+      setActivePanel(1);
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    touchDeltaX.current = 0;
+  };
 
   if (!isOpen) return null;
 
@@ -96,8 +139,13 @@ export function AccountBottomSheet({ isOpen, onClose, onNavigate, onOpenWishlist
           </div>
         </div>
 
-        {/* Sliding Tiles Carousel / Container */}
-        <div className="fk-account-sheet-panels-wrapper">
+        {/* Sliding Tiles Carousel / Container with Touch Swipe */}
+        <div
+          className="fk-account-sheet-panels-wrapper"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div
             className={`fk-account-sheet-slider ${
               activePanel === 2 ? 'is-panel-2' : 'is-panel-1'

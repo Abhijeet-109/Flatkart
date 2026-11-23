@@ -55,9 +55,11 @@ function AppContent() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 700);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!loading) {
+      const timer = setTimeout(() => setShowSplash(false), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
 
   useEffect(() => {
     if (window.location.pathname.toLowerCase() === '/cart') {
@@ -123,12 +125,15 @@ function AppContent() {
     if (!loading && authorizedPage !== currentPage) navigateTo(authorizedPage);
   }, [loading, authorizedPage, currentPage, navigateTo]);
 
-  // Do not render role-specific pages while the server is validating saved auth state.
-  if (loading) {
+  // Unified branded logo loading screen while initializing auth or showing initial splash
+  if (loading || showSplash) {
     return (
-      <main className="fk-app-loading" role="status" aria-live="polite">
-        Loading your Flatkart account…
-      </main>
+      <div className={`fk-app-splash ${!loading ? 'is-fading' : ''}`} role="status" aria-live="polite">
+        <div className="fk-app-splash-brand">
+          <div className="fk-app-splash-logo">FLATKART</div>
+          <div className="fk-app-splash-tagline">Everyday Finds · AI-Powered Help</div>
+        </div>
+      </div>
     );
   }
 
@@ -196,14 +201,6 @@ function AppContent() {
 
   return (
     <>
-      {showSplash && (
-        <div className="fk-app-splash" aria-hidden="true">
-          <div className="fk-app-splash-brand">
-            <div className="fk-app-splash-logo">FLATKART</div>
-            <div className="fk-app-splash-tagline">Everyday Finds · AI-Powered Help</div>
-          </div>
-        </div>
-      )}
       {renderCurrentPage()}
       {showBottomNav && <BottomNav currentPage={authorizedPage} onNavigate={navigateTo} />}
     </>

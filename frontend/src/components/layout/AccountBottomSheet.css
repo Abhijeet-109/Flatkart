@@ -124,6 +124,8 @@
   overflow: hidden;
   position: relative;
   width: 100%;
+  touch-action: pan-y;
+  user-select: none;
 }
 
 .fk-account-sheet-slider {

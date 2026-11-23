@@ -906,8 +906,8 @@ input, textarea, select {
   right: 24px;
   z-index: 500;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
   cursor: pointer;
   user-select: none;
   filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.18));
@@ -977,16 +977,30 @@ input, textarea, select {
 }
 
 .fk-ryan-bubble-prompt {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
   background-color: #FFFFFF;
   color: var(--fk-text-primary);
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 14px;
+  font-size: 11.5px;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
   border: 1px solid #ECE8DF;
   white-space: nowrap;
   animation: fadeIn 0.3s ease;
+  pointer-events: none;
+}
+
+.fk-ryan-bubble-prompt::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 20px;
+  border-width: 5px 5px 0;
+  border-style: solid;
+  border-color: #FFFFFF transparent transparent;
 }
 
 .fk-floating-help-widget {
@@ -1935,17 +1949,40 @@ input, textarea, select {
     padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
   }
 
-  /* Ryan widget repositioned above floating bottom nav */
-  .fk-ryan-widget {
-    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
-    right: 16px;
+  /* On Home page: Floating bottom nav and Ryan widget sit side-by-side */
+  .fk-bottom-nav.fk-bottom-nav-home {
+    left: 12px;
+    right: 76px;
+    max-width: calc(100vw - 88px);
+    margin: 0;
   }
-  .fk-ryan-widget.is-page-account,
-  .fk-ryan-widget.is-page-cart {
-    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
-    right: 16px;
+
+  .fk-ryan-widget.is-page-home {
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 12px !important;
+    top: auto !important;
   }
-  .fk-ryan-avatar-badge {
+
+  .fk-ryan-widget.is-page-home .fk-ryan-avatar-badge {
+    width: 58px;
+    height: 58px;
+  }
+
+  /* On non-Home pages: Bottom nav ribbon occupies full width; Ryan sits directly above ribbon */
+  .fk-bottom-nav:not(.fk-bottom-nav-home) {
+    left: 16px;
+    right: 16px;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .fk-ryan-widget:not(.is-page-home) {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 16px !important;
+    top: auto !important;
+  }
+
+  .fk-ryan-widget:not(.is-page-home) .fk-ryan-avatar-badge {
     width: 48px;
     height: 48px;
   }

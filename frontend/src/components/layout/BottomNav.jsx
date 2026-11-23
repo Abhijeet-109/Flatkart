@@ -37,7 +37,7 @@ export function BottomNav({ currentPage, onNavigate }) {
         }}
       />
 
-      <nav className="fk-bottom-nav" aria-label="Mobile navigation">
+      <nav className={`fk-bottom-nav ${isHome ? 'fk-bottom-nav-home' : ''}`} aria-label="Mobile navigation">
         <button
           type="button"
           className={`fk-bottom-nav-item ${isHome ? 'is-active' : ''}`}

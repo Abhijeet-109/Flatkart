@@ -147,6 +147,7 @@ export function Home({ onNavigate, initialCategory = null }) {
           isOpen={isChatbotOpen}
           onToggle={() => setIsChatbotOpen(!isChatbotOpen)}
           onNavigate={onNavigate}
+          currentPage="home"
         />
       )}
 
