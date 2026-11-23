@@ -869,6 +869,7 @@ export function MyConversations({ onNavigate }) {
                                 onClick={() => {
                                   setRowActionThreadId(null);
                                   setDeleteTargetThreadId(conv.thread_id);
+                                  setIsSidebarOpen(false);
                                   setIsDeleteModalOpen(true);
                                 }}
                               >

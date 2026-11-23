@@ -22,9 +22,9 @@ import { ProductGrid } from '../components/products/ProductGrid';
 const flattenCategories = (rows) => rows.flatMap((row) => [row, ...flattenCategories(row.children || [])]);
 const categoryTreeIds = (category) => [category.id, ...(category.children || []).flatMap(categoryTreeIds)];
 
-export function Home({ onNavigate }) {
+export function Home({ onNavigate, initialCategory = null }) {
   const { user } = useAuth();
-  const [activeCategory, setActiveCategory] = useState('Home');
+  const [activeCategory, setActiveCategory] = useState(initialCategory || 'Home');
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [catalogueSnapshot, setCatalogueSnapshot] = useState(getHomeCatalogueSnapshot);
   const [catalogue, setCatalogue] = useState(() => catalogueSnapshot?.products || []);
@@ -33,24 +33,7 @@ export function Home({ onNavigate }) {
   const [catalogueError, setCatalogueError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  useEffect(() => {
-    let alive = true;
-    getHomeCatalogue()
-      .then((snapshot) => {
-        if (!alive) return;
-        setCatalogueSnapshot(snapshot);
-        setCatalogue(snapshot.products);
-        setCategories(snapshot.categories);
-      })
-      .catch((error) => { if (alive) setCatalogueError(error.message || 'Could not load the catalogue.'); })
-      .finally(() => { if (alive) setCatalogueLoading(false); });
-    return () => { alive = false; };
-  }, []);
-
   const categoryRows = useMemo(() => flattenCategories(categories), [categories]);
-  const featured = catalogue.slice(0, 4);
-  const trending = catalogue.slice(4, 8);
-  const fresh = catalogue.slice(-4).reverse();
 
   const handleSelectCategory = (catName) => {
     setActiveCategory(catName);
@@ -72,10 +55,34 @@ export function Home({ onNavigate }) {
     }
   };
 
+  useEffect(() => {
+    if (initialCategory && categoryRows.length > 0) {
+      handleSelectCategory(initialCategory);
+    }
+  }, [initialCategory, categoryRows]);
+
+  useEffect(() => {
+    let alive = true;
+    getHomeCatalogue()
+      .then((snapshot) => {
+        if (!alive) return;
+        setCatalogueSnapshot(snapshot);
+        setCatalogue(snapshot.products);
+        setCategories(snapshot.categories);
+      })
+      .catch((error) => { if (alive) setCatalogueError(error.message || 'Could not load the catalogue.'); })
+      .finally(() => { if (alive) setCatalogueLoading(false); });
+    return () => { alive = false; };
+  }, []);
+
+  const featured = catalogue.slice(0, 4);
+  const trending = catalogue.slice(4, 8);
+  const fresh = catalogue.slice(-4).reverse();
+
   const handleSelectProduct = (product) => onNavigate('product', product.slug || product.id);
 
   return (
-    <div className="fk-page-container">
+    <div className="fk-page-container fk-home-page">
       {/* 1. Main Header */}
       <Header
         onNavigate={onNavigate}

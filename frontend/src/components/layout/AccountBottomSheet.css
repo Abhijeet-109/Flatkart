@@ -1,0 +1,204 @@
+/* Account Bottom Sheet Floating Panel */
+.fk-account-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 45, 41, 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 480;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 12px;
+  animation: fk-sheet-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fk-account-sheet-container {
+  width: 100%;
+  max-width: 440px;
+  background: #FFFFFF;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
+  animation: fk-sheet-slide-up 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fk-sheet-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fk-sheet-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.fk-account-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid #F0ECE1;
+  background: #FCFBF9;
+}
+
+.fk-account-sheet-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fk-account-sheet-greeting {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fk-header, #122D29);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fk-account-sheet-email {
+  font-size: 11px;
+  color: var(--fk-text-muted, #6B7280);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fk-account-sheet-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.fk-account-sheet-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid #E5E0D5;
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #B91C1C;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fk-account-sheet-logout-btn:hover {
+  background: #FDF2F2;
+  border-color: #F87171;
+}
+
+.fk-account-sheet-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--fk-text-muted, #6B7280);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fk-account-sheet-close-btn:hover {
+  background: #EDEAE1;
+  color: var(--fk-header, #122D29);
+}
+
+.fk-account-sheet-panels-wrapper {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.fk-account-sheet-slider {
+  display: flex;
+  width: 200%;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fk-account-sheet-slider.is-panel-1 {
+  transform: translateX(0%);
+}
+
+.fk-account-sheet-slider.is-panel-2 {
+  transform: translateX(-50%);
+}
+
+.fk-account-sheet-panel {
+  width: 50%;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.fk-account-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.fk-account-sheet-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 4px;
+  background: #FAF8F5;
+  border: 1px solid #EFECE4;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fk-account-sheet-tile:active {
+  transform: scale(0.96);
+  background: #EDEAE1;
+}
+
+.fk-account-sheet-tile-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.fk-account-sheet-tile:active .fk-account-sheet-tile-icon {
+  transform: scale(1.05);
+}
+
+.fk-account-sheet-tile-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fk-text-primary, #1F2937);
+  text-align: center;
+}
+
+.fk-account-sheet-tile-more .fk-account-sheet-tile-label {
+  color: var(--fk-header, #122D29);
+  font-weight: 700;
+}
+
+.fk-account-sheet-tile-back .fk-account-sheet-tile-label {
+  color: var(--fk-header, #122D29);
+  font-weight: 700;
+}

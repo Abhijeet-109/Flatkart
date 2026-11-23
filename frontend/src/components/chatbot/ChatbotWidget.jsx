@@ -324,58 +324,27 @@ export function ChatbotWidget({ isOpen, onToggle, onNavigate, returnIntakeReques
 
             {/* Quick Inquiry Buttons (only for authenticated users) */}
             {isAuthenticated && (
-              <div
-                style={{
-                  padding: '8px 16px',
-                  background: '#F4F1EA',
-                  display: 'flex',
-                  gap: '6px',
-                  flexWrap: 'wrap',
-                  minWidth: 0,
-                  borderTop: '1px solid #EFECE4',
-                }}
-              >
+              <div className="fk-chatbot-quick-questions">
                 <button
-                  style={{
-                    fontSize: '11.5px',
-                    padding: '4px 8px',
-                    background: '#FFFFFF',
-                    border: '1px solid #D8D4C8',
-                    borderRadius: '12px',
-                    whiteSpace: 'normal',
-                    cursor: 'pointer',
-                  }}
+                  type="button"
+                  className="fk-chatbot-quick-btn"
                   onClick={() => handleQuickQuestion("What is Flatkart's return and refund policy?")}
                 >
-                  🔄 Return Policy
+                  <span>🔄</span> Return Policy
                 </button>
                 <button
-                  style={{
-                    fontSize: '11.5px',
-                    padding: '4px 8px',
-                    background: '#FFFFFF',
-                    border: '1px solid #D8D4C8',
-                    borderRadius: '12px',
-                    whiteSpace: 'normal',
-                    cursor: 'pointer',
-                  }}
+                  type="button"
+                  className="fk-chatbot-quick-btn"
                   onClick={() => handleQuickQuestion('What are the shipping and delivery options?')}
                 >
-                  🚚 Delivery Options
+                  <span>🚚</span> Delivery Options
                 </button>
                 <button
-                  style={{
-                    fontSize: '11.5px',
-                    padding: '4px 8px',
-                    background: '#FFFFFF',
-                    border: '1px solid #D8D4C8',
-                    borderRadius: '12px',
-                    whiteSpace: 'normal',
-                    cursor: 'pointer',
-                  }}
+                  type="button"
+                  className="fk-chatbot-quick-btn"
                   onClick={() => handleQuickQuestion('What payment methods are supported?')}
                 >
-                  💳 Payment Methods
+                  <span>💳</span> Payment Methods
                 </button>
               </div>
             )}

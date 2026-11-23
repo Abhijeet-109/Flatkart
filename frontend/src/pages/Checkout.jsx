@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Banknote, Building2, CheckCircle2, LockKeyhole, MapPin, Smartphone, ShieldCheck, Trash2, Minus, Plus } from 'lucide-react';
 import { Header } from '../components/layout/Header';
-import { Footer } from '../components/layout/Footer';
 import { CartDrawer } from '../components/common/CartDrawer';
 import { WishlistDrawer } from '../components/common/WishlistDrawer';
 import { useAuth } from '../context/AuthContext';
@@ -236,7 +235,7 @@ export function Checkout({ onNavigate }) {
           </aside>
         </form>}
     </main>
-    <Footer onNavigate={onNavigate} /><CartDrawer onNavigate={onNavigate} /><WishlistDrawer onNavigate={onNavigate} />
+    <CartDrawer onNavigate={onNavigate} /><WishlistDrawer onNavigate={onNavigate} />
     <SuccessOverlay message={success.message} orderNumber={success.orderNumber} onContinue={() => onNavigate('home')} />
   </div>;
 }

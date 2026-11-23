@@ -184,8 +184,48 @@
 .fk-ryan-loading-text {
   font-size: 13px;
   color: var(--fk-text-primary, #2A3B34);
-  font-weight: 600;
+  font-weight: 500;
+  opacity: 0.6;
   animation: fk-ryan-text-fade 0.4s ease;
+}
+
+/* Quick Inquiry Pill Strip */
+.fk-chatbot-quick-questions {
+  padding: 8px 12px;
+  background: #F4F1EA;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  border-top: 1px solid #EFECE4;
+}
+
+.fk-chatbot-quick-questions::-webkit-scrollbar {
+  display: none;
+}
+
+.fk-chatbot-quick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  background: #FFFFFF;
+  border: 1px solid #D8D4C8;
+  border-radius: 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: var(--fk-text-primary, #1F2937);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fk-chatbot-quick-btn:hover {
+  background: #FAF8F5;
+  border-color: var(--fk-header, #122D29);
+  color: var(--fk-header, #122D29);
 }
 
 .fk-ryan-loading-dots {

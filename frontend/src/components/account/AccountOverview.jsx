@@ -100,7 +100,7 @@ export function AccountOverview({ onNavigate, onOpenWishlist, onToggleChatbot })
           aria-label="View My Orders"
         >
           <div className="fk-account-tile-icon-box">
-            <Package size={22} color="var(--fk-forest-dark)" />
+            <Package size={22} color="var(--fk-header, #122D29)" />
           </div>
           <span className="fk-account-tile-title">Orders</span>
         </button>

@@ -317,18 +317,7 @@ export function Header({ onOpenAuth, onSelectProduct, onNavigate }) {
           </div>
         )}
 
-        {/* Orders - only for authenticated users per requirement A2 */}
-        {isAuthenticated && (
-          <button
-            className="fk-header-nav-link"
-            onClick={handleOrdersClick}
-            aria-label="Orders and Complaints"
-          >
-            Orders
-          </button>
-        )}
-
-        {/* Note: Wishlist is removed from primary nav per requirement A1; remains in Account */}
+        {/* Note: Orders and Wishlist removed from top nav per requirements; accessible via Account */}
 
         {/* Functional Cart Button */}
         <button

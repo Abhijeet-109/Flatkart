@@ -49,8 +49,15 @@ function AppContent() {
   const { setIsCartOpen } = useCart();
   const initialProductSlug = window.location.pathname.match(/^\/products\/([^/]+)\/?$/i)?.[1];
   const [productSlug, setProductSlug] = useState(() => initialProductSlug ? decodeURIComponent(initialProductSlug) : '');
+  const [homeCategory, setHomeCategory] = useState(null);
   const [currentPage, setCurrentPage] = useState(() => pageFromPath(window.location.pathname));
   const [routePath, setRoutePath] = useState(() => window.location.pathname);
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 700);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (window.location.pathname.toLowerCase() === '/cart') {
@@ -62,17 +69,25 @@ function AppContent() {
     const handlePopState = () => {
       setRoutePath(window.location.pathname);
       const productMatch = window.location.pathname.match(/^\/products\/([^/]+)\/?$/i);
-      if (productMatch) setProductSlug(decodeURIComponent(productMatch[1]));
+      if (productMatch) {
+        setProductSlug(decodeURIComponent(productMatch[1]));
+      } else {
+        setProductSlug('');
+      }
       if (window.location.pathname.toLowerCase() === '/cart') setIsCartOpen(true);
       setCurrentPage(pageFromPath(window.location.pathname));
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [setIsCartOpen]);
 
   const navigateTo = useCallback((page, value) => {
     let targetPath = '/';
+    if (page === 'home') {
+      targetPath = '/';
+      setHomeCategory(value || null);
+    }
     if (page === 'product' && value) {
       targetPath = `/products/${encodeURIComponent(value)}`;
       setProductSlug(value);
@@ -176,11 +191,19 @@ function AppContent() {
       return <LegalPage page={authorizedPage} onNavigate={navigateTo} />;
     }
 
-    return <Home onNavigate={navigateTo} />;
+    return <Home onNavigate={navigateTo} initialCategory={homeCategory} />;
   };
 
   return (
     <>
+      {showSplash && (
+        <div className="fk-app-splash" aria-hidden="true">
+          <div className="fk-app-splash-brand">
+            <div className="fk-app-splash-logo">FLATKART</div>
+            <div className="fk-app-splash-tagline">Everyday Finds · AI-Powered Help</div>
+          </div>
+        </div>
+      )}
       {renderCurrentPage()}
       {showBottomNav && <BottomNav currentPage={authorizedPage} onNavigate={navigateTo} />}
     </>
