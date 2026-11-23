@@ -72,7 +72,7 @@ export function Home({ onNavigate }) {
     }
   };
 
-  const handleSelectProduct = (product) => onNavigate('product', product.slug);
+  const handleSelectProduct = (product) => onNavigate('product', product.slug || product.id);
 
   return (
     <div className="fk-page-container">

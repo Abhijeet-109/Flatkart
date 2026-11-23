@@ -22,12 +22,13 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
+  PanelLeft,
+  SquarePen,
 } from 'lucide-react';
 
 import { AccountLayout } from '../components/account/AccountLayout';
 import { CartDrawer } from '../components/common/CartDrawer';
 import { WishlistDrawer } from '../components/common/WishlistDrawer';
-import { ChatbotWidget } from '../components/chatbot/ChatbotWidget';
 import { isValidStructuredResponse } from '../components/chatbot/agentResponsePresentation';
 
 const AssistantMessageContent = lazy(() => import('../components/chatbot/AssistantMessageContent'));
@@ -115,7 +116,7 @@ export function MyConversations({ onNavigate }) {
 
   // Dropdown & modal states
   const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
-  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Custom delete confirmation modal & in-app toast states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -686,36 +687,53 @@ export function MyConversations({ onNavigate }) {
       activeItem="conversations"
       onNavigate={onNavigate}
       onOpenWishlist={() => setIsWishlistOpen(true)}
-      onToggleChatbot={() => setIsChatbotOpen((open) => !open)}
     >
       <div className="fk-conversations-main">
-        <div className="fk-conversations-header">
-          <h1 className="fk-conversations-title">My Conversations</h1>
-          <p className="fk-conversations-subtitle">
-            AI shopping &amp; support
-          </p>
-        </div>
+        {/* Mobile Sidebar Overlay Backdrop */}
+        {isSidebarOpen && (
+          <div
+            className="fk-conv-sidebar-overlay"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
 
-          {/* Two Panels Layout */}
-          <div className="fk-conversations-panels">
-            {/* ---------------------------------------------------- */}
-            {/* LEFT PANEL: Conversation History & Search */}
-            {/* ---------------------------------------------------- */}
-            <section className="fk-conv-left-panel" aria-label="Conversation history">
-              {/* "+ New Conversation" Button */}
+        {/* Two Panels Layout */}
+        <div className={`fk-conversations-panels ${isSidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
+          {/* ---------------------------------------------------- */}
+          {/* LEFT PANEL: Conversation History & Search */}
+          {/* ---------------------------------------------------- */}
+          <section className={`fk-conv-left-panel ${isSidebarOpen ? 'is-open' : 'is-collapsed'}`} aria-label="Conversation history">
+            {/* Mobile close bar */}
+            <div className="fk-conv-sidebar-mobile-header">
+              <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--fk-text-primary)' }}>Chat History</span>
               <button
-                className="fk-new-conv-btn"
-                onClick={handleNewConversation}
-                disabled={isCreating}
-                aria-label="Start new conversation"
+                type="button"
+                className="fk-conv-sidebar-close-btn"
+                onClick={() => setIsSidebarOpen(false)}
+                aria-label="Close sidebar"
               >
-                {isCreating ? (
-                  <Loader2 size={16} className="fk-spin" />
-                ) : (
-                  <Plus size={18} strokeWidth={2.4} />
-                )}
-                <span>New Conversation</span>
+                <X size={18} />
               </button>
+            </div>
+
+            {/* "+ New Conversation" Button */}
+            <button
+              className="fk-new-conv-btn"
+              onClick={() => {
+                handleNewConversation();
+                setIsSidebarOpen(false);
+              }}
+              disabled={isCreating}
+              aria-label="Start new conversation"
+            >
+              {isCreating ? (
+                <Loader2 size={16} className="fk-spin" />
+              ) : (
+                <Plus size={18} strokeWidth={2.4} />
+              )}
+              <span>New Conversation</span>
+            </button>
 
               {/* Search Conversations Input */}
               <div className="fk-conv-search-box">
@@ -770,6 +788,7 @@ export function MyConversations({ onNavigate }) {
                         onClick={() => {
                           setActiveThreadId(conv.thread_id);
                           setLastFailedRequest(null);
+                          setIsSidebarOpen(false);
                         }}
                         aria-selected={isSelected}
                       >
@@ -802,22 +821,45 @@ export function MyConversations({ onNavigate }) {
             <section className="fk-conv-right-panel" aria-label="Chat window">
               {/* Header Bar */}
               <div className="fk-chat-header">
+                <button
+                  type="button"
+                  className="fk-chat-sidebar-toggle"
+                  onClick={() => setIsSidebarOpen((prev) => !prev)}
+                  title={isSidebarOpen ? 'Close chat history' : 'Open chat history'}
+                  aria-label="Toggle chat history"
+                >
+                  <PanelLeft size={20} />
+                </button>
+
                 <div className="fk-chat-header-info">
                   <div className="fk-chat-avatar-small">
-                    <Bot size={22} strokeWidth={2} />
+                    <Bot size={20} strokeWidth={2.2} color="var(--fk-gold)" />
                   </div>
                   <div className="fk-chat-header-titles">
                     <div className="fk-chat-header-title-row">
-                      <span className="fk-chat-header-name">Flatkart Assistant</span>
+                      <span className="fk-chat-header-name">Ryan</span>
                       <span className="fk-chat-ai-badge">AI</span>
                     </div>
                     <span className="fk-chat-header-desc">
-                      Your AI shopping and support assistant
+                      Your AI shopping and support companion
                     </span>
                   </div>
                 </div>
 
                 <div className="fk-chat-header-actions" ref={menuRef}>
+                  <button
+                    type="button"
+                    className="fk-chat-action-btn"
+                    onClick={() => {
+                      handleNewConversation();
+                      setIsSidebarOpen(false);
+                    }}
+                    title="New conversation"
+                    aria-label="New conversation"
+                  >
+                    <SquarePen size={17} strokeWidth={1.8} />
+                  </button>
+
                   <button
                     className="fk-chat-action-btn delete-btn"
                     onClick={handleDeleteConversation}
@@ -1139,7 +1181,6 @@ export function MyConversations({ onNavigate }) {
       {/* Global Modals & Drawers */}
       <CartDrawer onNavigate={onNavigate} />
       <WishlistDrawer onNavigate={onNavigate} />
-      <ChatbotWidget isOpen={isChatbotOpen} onToggle={() => setIsChatbotOpen((open) => !open)} onNavigate={onNavigate} />
 
       {/* Custom Delete Confirmation Modal */}
       {isDeleteModalOpen && (

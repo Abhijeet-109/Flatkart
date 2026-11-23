@@ -14,7 +14,9 @@ import { SuperAdminDashboardPage } from './pages/SuperAdminDashboardPage';
 import { ProductDetails } from './pages/ProductDetails';
 import { Checkout } from './pages/Checkout';
 import { MyAccount } from './pages/MyAccount';
+import { CategoriesPage } from './pages/CategoriesPage';
 import { LegalPage } from './pages/LegalPage';
+import { BottomNav } from './components/layout/BottomNav';
 import { resolveAuthorizedPage } from './utils/roleAccess';
 
 const LEGAL_PAGES = {
@@ -29,6 +31,7 @@ function pageFromPath(pathname) {
   if (LEGAL_PAGES[path]) return LEGAL_PAGES[path];
   if (/^\/products\/[^/]+\/?$/.test(path)) return 'product';
   if (path === '/checkout') return 'checkout';
+  if (path === '/categories') return 'categories';
   if (path === '/cart') return 'home';
   if (path.startsWith('/account')) return 'account';
   if (path === '/login') return 'login';
@@ -75,6 +78,7 @@ function AppContent() {
       setProductSlug(value);
     }
     if (page === 'checkout') targetPath = '/checkout';
+    if (page === 'categories') targetPath = '/categories';
     if (page === 'cart') {
       setIsCartOpen(true);
       return;
@@ -113,52 +117,74 @@ function AppContent() {
     );
   }
 
-  if (authorizedPage === 'login') {
-    return <Login onNavigate={navigateTo} />;
-  }
+  const isStaffPage = authorizedPage === 'handler-dashboard'
+    || authorizedPage === 'admin-dashboard'
+    || authorizedPage === 'super-admin-dashboard';
+  const showBottomNav = !isStaffPage
+    && authorizedPage !== 'checkout'
+    && authorizedPage !== 'my-conversations'
+    && authorizedPage !== 'login'
+    && authorizedPage !== 'register';
 
-  if (authorizedPage === 'register') {
-    return <Register onNavigate={navigateTo} />;
-  }
+  const renderCurrentPage = () => {
+    if (authorizedPage === 'login') {
+      return <Login onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'my-complaints') {
-    return <MyComplaints onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'register') {
+      return <Register onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'my-conversations') {
-    return <MyConversations onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'my-complaints') {
+      return <MyComplaints onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'handler-dashboard') {
-    return <HandlerDashboardPage routePath={routePath} onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'my-conversations') {
+      return <MyConversations onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'admin-dashboard') {
-    return <AdminDashboardPage onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'handler-dashboard') {
+      return <HandlerDashboardPage routePath={routePath} onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'super-admin-dashboard') {
-    return <SuperAdminDashboardPage onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'admin-dashboard') {
+      return <AdminDashboardPage onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'product') {
-    return <ProductDetails slug={productSlug} onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'super-admin-dashboard') {
+      return <SuperAdminDashboardPage onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'checkout') {
-    return <Checkout onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'product') {
+      return <ProductDetails slug={productSlug} onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'account') {
-    const section = routePath.split('/')[2] || 'profile';
-    return <MyAccount section={section} onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'checkout') {
+      return <Checkout onNavigate={navigateTo} />;
+    }
 
-  if (LEGAL_PAGES[`/${authorizedPage}`]) {
-    return <LegalPage page={authorizedPage} onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'categories') {
+      return <CategoriesPage onNavigate={navigateTo} />;
+    }
 
-  return <Home onNavigate={navigateTo} />;
+    if (authorizedPage === 'account') {
+      const section = routePath.split('/')[2] || 'profile';
+      return <MyAccount section={section} onNavigate={navigateTo} />;
+    }
+
+    if (LEGAL_PAGES[`/${authorizedPage}`]) {
+      return <LegalPage page={authorizedPage} onNavigate={navigateTo} />;
+    }
+
+    return <Home onNavigate={navigateTo} />;
+  };
+
+  return (
+    <>
+      {renderCurrentPage()}
+      {showBottomNav && <BottomNav currentPage={authorizedPage} onNavigate={navigateTo} />}
+    </>
+  );
 }
 
 export function App() {
