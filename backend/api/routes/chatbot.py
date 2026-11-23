@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from backend.chatbot.answer_pipeline import (
     answer_question,
     detect_obvious_security_request,
+    detect_cheap_handling,
 )
 from backend.Database.connection import SessionLocal
 from backend.Database.models import (
@@ -682,6 +683,7 @@ def ask_chatbot(
             conversation.title = "Return or Replace"
         else:
             prefilter_category = detect_obvious_security_request(question)
+            cheap_match = detect_cheap_handling(question)
 
             if prefilter_category:
                 prefilter_blocked = True
@@ -693,6 +695,33 @@ def ask_chatbot(
                 )
 
                 result = text_response("guardrail", "Your request cannot be processed.")
+                if callable(getattr(graph, "update_state", None)):
+                    graph.update_state(
+                        config,
+                        {
+                            "answer": result,
+                            "last_request_id": request.request_id,
+                            "messages": [
+                                HumanMessage(content=question),
+                                AIMessage(
+                                    content=result["answer"],
+                                    additional_kwargs={STRUCTURED_RESPONSE_KEY: result},
+                                ),
+                            ],
+                        },
+                    )
+
+            elif cheap_match:
+                prefilter_blocked = True
+                cheap_category, cheap_answer = cheap_match
+
+                logger.info(
+                    "[CHATBOT] Request handled cheaply by deterministic prefilter. "
+                    "Category: %s",
+                    cheap_category,
+                )
+
+                result = text_response("support", cheap_answer)
                 if callable(getattr(graph, "update_state", None)):
                     graph.update_state(
                         config,

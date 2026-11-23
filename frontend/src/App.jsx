@@ -14,7 +14,9 @@ import { SuperAdminDashboardPage } from './pages/SuperAdminDashboardPage';
 import { ProductDetails } from './pages/ProductDetails';
 import { Checkout } from './pages/Checkout';
 import { MyAccount } from './pages/MyAccount';
+import { CategoriesPage } from './pages/CategoriesPage';
 import { LegalPage } from './pages/LegalPage';
+import { BottomNav } from './components/layout/BottomNav';
 import { resolveAuthorizedPage } from './utils/roleAccess';
 
 const LEGAL_PAGES = {
@@ -29,6 +31,7 @@ function pageFromPath(pathname) {
   if (LEGAL_PAGES[path]) return LEGAL_PAGES[path];
   if (/^\/products\/[^/]+\/?$/.test(path)) return 'product';
   if (path === '/checkout') return 'checkout';
+  if (path === '/categories') return 'categories';
   if (path === '/cart') return 'home';
   if (path.startsWith('/account')) return 'account';
   if (path === '/login') return 'login';
@@ -46,8 +49,17 @@ function AppContent() {
   const { setIsCartOpen } = useCart();
   const initialProductSlug = window.location.pathname.match(/^\/products\/([^/]+)\/?$/i)?.[1];
   const [productSlug, setProductSlug] = useState(() => initialProductSlug ? decodeURIComponent(initialProductSlug) : '');
+  const [homeCategory, setHomeCategory] = useState(null);
   const [currentPage, setCurrentPage] = useState(() => pageFromPath(window.location.pathname));
   const [routePath, setRoutePath] = useState(() => window.location.pathname);
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => setShowSplash(false), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
 
   useEffect(() => {
     if (window.location.pathname.toLowerCase() === '/cart') {
@@ -59,27 +71,36 @@ function AppContent() {
     const handlePopState = () => {
       setRoutePath(window.location.pathname);
       const productMatch = window.location.pathname.match(/^\/products\/([^/]+)\/?$/i);
-      if (productMatch) setProductSlug(decodeURIComponent(productMatch[1]));
+      if (productMatch) {
+        setProductSlug(decodeURIComponent(productMatch[1]));
+      } else {
+        setProductSlug('');
+      }
       if (window.location.pathname.toLowerCase() === '/cart') setIsCartOpen(true);
       setCurrentPage(pageFromPath(window.location.pathname));
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [setIsCartOpen]);
 
   const navigateTo = useCallback((page, value) => {
     let targetPath = '/';
+    if (page === 'home') {
+      targetPath = '/';
+      setHomeCategory(value || null);
+    }
     if (page === 'product' && value) {
       targetPath = `/products/${encodeURIComponent(value)}`;
       setProductSlug(value);
     }
     if (page === 'checkout') targetPath = '/checkout';
+    if (page === 'categories') targetPath = '/categories';
     if (page === 'cart') {
       setIsCartOpen(true);
       return;
     }
-    if (page === 'account') targetPath = `/account/${value || 'profile'}`;
+    if (page === 'account') targetPath = value ? `/account/${value}` : '/account/overview';
     if (page === 'login') targetPath = '/login';
     if (page === 'register') targetPath = '/register';
     if (page === 'my-complaints') targetPath = '/my-complaints';
@@ -104,61 +125,86 @@ function AppContent() {
     if (!loading && authorizedPage !== currentPage) navigateTo(authorizedPage);
   }, [loading, authorizedPage, currentPage, navigateTo]);
 
-  // Do not render role-specific pages while the server is validating saved auth state.
-  if (loading) {
+  // Unified branded logo loading screen while initializing auth or showing initial splash
+  if (loading || showSplash) {
     return (
-      <main className="fk-app-loading" role="status" aria-live="polite">
-        Loading your Flatkart account…
-      </main>
+      <div className={`fk-app-splash ${!loading ? 'is-fading' : ''}`} role="status" aria-live="polite">
+        <div className="fk-app-splash-brand">
+          <div className="fk-app-splash-logo">FLATKART</div>
+          <div className="fk-app-splash-tagline">Everyday Finds · AI-Powered Help</div>
+        </div>
+      </div>
     );
   }
 
-  if (authorizedPage === 'login') {
-    return <Login onNavigate={navigateTo} />;
-  }
+  const isStaffPage = authorizedPage === 'handler-dashboard'
+    || authorizedPage === 'admin-dashboard'
+    || authorizedPage === 'super-admin-dashboard';
+  const showBottomNav = !isStaffPage
+    && authorizedPage !== 'checkout'
+    && authorizedPage !== 'my-conversations'
+    && authorizedPage !== 'login'
+    && authorizedPage !== 'register';
 
-  if (authorizedPage === 'register') {
-    return <Register onNavigate={navigateTo} />;
-  }
+  const renderCurrentPage = () => {
+    if (authorizedPage === 'login') {
+      return <Login onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'my-complaints') {
-    return <MyComplaints onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'register') {
+      return <Register onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'my-conversations') {
-    return <MyConversations onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'my-complaints') {
+      return <MyComplaints onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'handler-dashboard') {
-    return <HandlerDashboardPage routePath={routePath} onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'my-conversations') {
+      return <MyConversations onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'admin-dashboard') {
-    return <AdminDashboardPage onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'handler-dashboard') {
+      return <HandlerDashboardPage routePath={routePath} onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'super-admin-dashboard') {
-    return <SuperAdminDashboardPage onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'admin-dashboard') {
+      return <AdminDashboardPage onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'product') {
-    return <ProductDetails slug={productSlug} onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'super-admin-dashboard') {
+      return <SuperAdminDashboardPage onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'checkout') {
-    return <Checkout onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'product') {
+      return <ProductDetails slug={productSlug} onNavigate={navigateTo} />;
+    }
 
-  if (authorizedPage === 'account') {
-    const section = routePath.split('/')[2] || 'profile';
-    return <MyAccount section={section} onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'checkout') {
+      return <Checkout onNavigate={navigateTo} />;
+    }
 
-  if (LEGAL_PAGES[`/${authorizedPage}`]) {
-    return <LegalPage page={authorizedPage} onNavigate={navigateTo} />;
-  }
+    if (authorizedPage === 'categories') {
+      return <CategoriesPage onNavigate={navigateTo} />;
+    }
 
-  return <Home onNavigate={navigateTo} />;
+    if (authorizedPage === 'account') {
+      const section = routePath.split('/')[2] || 'overview';
+      return <MyAccount section={section} onNavigate={navigateTo} />;
+    }
+
+    if (LEGAL_PAGES[`/${authorizedPage}`]) {
+      return <LegalPage page={authorizedPage} onNavigate={navigateTo} />;
+    }
+
+    return <Home onNavigate={navigateTo} initialCategory={homeCategory} />;
+  };
+
+  return (
+    <>
+      {renderCurrentPage()}
+      {showBottomNav && <BottomNav currentPage={authorizedPage} onNavigate={navigateTo} />}
+    </>
+  );
 }
 
 export function App() {

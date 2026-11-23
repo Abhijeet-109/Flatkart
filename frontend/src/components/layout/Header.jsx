@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, ShoppingCart, Package, Heart, LogOut, LogIn, ChevronDown, MessageSquare, UserRound, Headphones } from 'lucide-react';
+import { Search, ShoppingCart, Package, Heart, LogOut, LogIn, ChevronDown, MessageSquare, UserRound, Headphones, Home } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useAddressBook } from '../../context/AddressContext';
 import { productService } from '../../services/productService';
+import { DeliveryModal } from '../common/DeliveryModal';
 
 export function Header({ onOpenAuth, onSelectProduct, onNavigate }) {
   const { user, logout, isAuthenticated } = useAuth();
   const { cartCount, setIsCartOpen, setIsWishlistOpen } = useCart();
+  const { selectedAddress } = useAddressBook();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -14,10 +17,15 @@ export function Header({ onOpenAuth, onSelectProduct, onNavigate }) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState('');
+  const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
   const requestSequence = useRef(0);
 
   const searchRef = useRef(null);
   const userMenuRef = useRef(null);
+
+  const addressLabel = selectedAddress
+    ? `Home · ${[selectedAddress.locality, selectedAddress.city, selectedAddress.pin_code].filter(Boolean).join(', ') || selectedAddress.pin_code}`
+    : (isAuthenticated ? 'Home · Select delivery address' : 'Home · Deliver to · Choose location');
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -98,6 +106,20 @@ export function Header({ onOpenAuth, onSelectProduct, onNavigate }) {
         <span>FLATKART</span>
       </div>
 
+      {/* Mobile Delivery Address Row */}
+      <button
+        type="button"
+        className="fk-header-delivery-row"
+        onClick={() => setIsDeliveryModalOpen(true)}
+        aria-label="Choose delivery location"
+      >
+        <div className="fk-header-delivery-content">
+          <Home size={15} strokeWidth={2.2} className="fk-header-delivery-icon" />
+          <span className="fk-header-delivery-text">{addressLabel}</span>
+        </div>
+        <ChevronDown size={14} strokeWidth={2.2} />
+      </button>
+
       {/* Search Bar */}
       <div className="fk-header-search-container" ref={searchRef}>
         <div className="fk-header-search-box">
@@ -165,7 +187,7 @@ export function Header({ onOpenAuth, onSelectProduct, onNavigate }) {
             </button>
 
             {isUserMenuOpen && (
-              <div className="fk-user-dropdown">
+              <div className="fk-user-dropdown" style={{ right: 0, left: 'auto' }}>
                 <div style={{ padding: '8px 16px 10px', borderBottom: '1px solid #ECE8DE' }}>
                   <div style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--fk-text-primary)' }}>
                     {user.name}
@@ -295,23 +317,7 @@ export function Header({ onOpenAuth, onSelectProduct, onNavigate }) {
           </div>
         )}
 
-        {/* Orders */}
-        <button
-          className="fk-header-nav-link"
-          onClick={handleOrdersClick}
-          aria-label="Orders and Complaints"
-        >
-          Orders
-        </button>
-
-        {/* Wishlist */}
-        <button
-          className="fk-header-nav-link wishlist-link"
-          onClick={() => setIsWishlistOpen(true)}
-          aria-label="Wishlist"
-        >
-          Wishlist
-        </button>
+        {/* Note: Orders and Wishlist removed from top nav per requirements; accessible via Account */}
 
         {/* Functional Cart Button */}
         <button
@@ -326,6 +332,12 @@ export function Header({ onOpenAuth, onSelectProduct, onNavigate }) {
           <span>Cart</span>
         </button>
       </div>
+
+      <DeliveryModal
+        isOpen={isDeliveryModalOpen}
+        onClose={() => setIsDeliveryModalOpen(false)}
+        onNavigate={handleNavigate}
+      />
     </header>
   );
 }

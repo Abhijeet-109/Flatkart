@@ -21,11 +21,65 @@ export function CartProvider({ children }) {
   const [serverWishlist, setServerWishlist] = useState({ ownerId: null, value: [] });
   const [guestWishlist, setGuestWishlist] = useState(loadWishlist);
   const [wishlistError, setWishlistError] = useState('');
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const [isCartOpen, setIsCartOpenState] = useState(false);
+  const [isWishlistOpen, setIsWishlistOpenState] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
   const [cartError, setCartError] = useState('');
   const requestVersion = useRef(0);
+
+  const setIsCartOpen = useCallback((open) => {
+    setIsCartOpenState((prev) => {
+      const next = typeof open === 'function' ? open(prev) : open;
+      if (next && !prev) {
+        if (window.location.hash !== '#cart') {
+          window.history.pushState({ drawer: 'cart' }, '', window.location.pathname + window.location.search + '#cart');
+        }
+      } else if (!next && prev) {
+        if (window.location.hash === '#cart') {
+          window.history.back();
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  const setIsWishlistOpen = useCallback((open) => {
+    setIsWishlistOpenState((prev) => {
+      const next = typeof open === 'function' ? open(prev) : open;
+      if (next && !prev) {
+        if (window.location.hash !== '#wishlist') {
+          window.history.pushState({ drawer: 'wishlist' }, '', window.location.pathname + window.location.search + '#wishlist');
+        }
+      } else if (!next && prev) {
+        if (window.location.hash === '#wishlist') {
+          window.history.back();
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash;
+      if (hash !== '#cart') {
+        setIsCartOpenState(false);
+      } else {
+        setIsCartOpenState(true);
+      }
+      if (hash !== '#wishlist') {
+        setIsWishlistOpenState(false);
+      } else {
+        setIsWishlistOpenState(true);
+      }
+    };
+
+    if (window.location.hash === '#cart') setIsCartOpenState(true);
+    if (window.location.hash === '#wishlist') setIsWishlistOpenState(true);
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const cart = cartForOwner(serverCart, ownerId);
   const cartItems = cart.items;

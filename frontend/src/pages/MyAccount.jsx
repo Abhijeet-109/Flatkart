@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Check, Eye, EyeOff, Pencil, Trash2, ChevronDown, ArrowLeft } from 'lucide-react';
 import { AccountLayout } from '../components/account/AccountLayout';
+import { AccountOverview } from '../components/account/AccountOverview';
 import { WishlistDrawer } from '../components/common/WishlistDrawer';
 import { ChatbotWidget } from '../components/chatbot/ChatbotWidget';
 import { CartDrawer } from '../components/common/CartDrawer';
@@ -16,7 +17,7 @@ const blankAddress = { recipient_name: '', mobile_number: '', address_line1: '',
 
 function EyeIcon({ visible }) { return visible ? <EyeOff size={17} /> : <Eye size={17} />; }
 
-function AccountSection({ section, onProfileSaved }) {
+function AccountSection({ section, onProfileSaved, onNavigate }) {
   const { refreshAddresses } = useAddressBook();
   const { user } = useAuth();
   const [profile, setProfile] = useState({ name: '', email: '', mobile_number: '' });
@@ -82,77 +83,258 @@ function AccountSection({ section, onProfileSaved }) {
     finally { setBusy(false); }
   };
 
-  const cardStyle = { padding: 22, border: '1px solid #e0dfd6', borderRadius: 9, background: 'var(--fk-surface)', marginBottom: 18 };
-  const fieldStyle = { display: 'grid', gap: 6, color: '#34463f', fontSize: 13, marginBottom: 13 };
-  const inputStyle = { width: '100%', minHeight: 42, padding: '9px 11px', border: '1px solid #d6d7ce', borderRadius: 5, font: 'inherit' };
   const title = section === 'address' ? 'Address Book' : section === 'payments' ? 'Payment Methods' : 'Profile Information';
 
-  return <section style={{ maxWidth: 820, padding: '28px 24px' }}>
-    <h1 style={{ margin: '0 0 7px', fontSize: 28 }}>{title}</h1>
-    <p style={{ margin: '0 0 22px', color: 'var(--fk-text-muted)' }}>Manage your Flatkart account information.</p>
-    {notice.text && <p role={notice.type === 'error' ? 'alert' : 'status'} style={{ padding: 12, borderRadius: 5, color: notice.type === 'error' ? '#8a3228' : '#245842', background: notice.type === 'error' ? '#fff3f0' : '#edf6ed' }}>{notice.text}</p>}
-    {loading && <p role="status" className="fk-account-state">Loading account information…</p>}
+  return (
+    <section className="fk-account-section-container">
+      {/* Mobile Back Button */}
+      <button
+        type="button"
+        className="fk-mobile-back-account"
+        onClick={() => onNavigate?.('account', 'overview')}
+        aria-label="Back to Account Overview"
+      >
+        <ArrowLeft size={16} />
+        <span>Back to Account</span>
+      </button>
 
-    {!loading && section === 'profile' && <>
-      <form onSubmit={saveProfile} style={cardStyle}>
-        <h2 style={{ marginTop: 0, fontSize: 18 }}>Personal details</h2>
-        <label style={fieldStyle}>Full name<input style={inputStyle} required maxLength={120} value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} /></label>
-        <label style={fieldStyle}>Registered email<input style={inputStyle} value={profile.email} readOnly /></label>
-        <label style={fieldStyle}>Mobile number<input style={inputStyle} inputMode="tel" minLength={10} maxLength={15} value={profile.mobile_number || ''} onChange={(e) => setProfile({ ...profile, mobile_number: e.target.value })} /></label>
-        <button className="fk-checkout-submit" disabled={busy}>Save profile</button>
-      </form>
-      <form onSubmit={changePassword} style={cardStyle}>
-        <h2 style={{ marginTop: 0, fontSize: 18 }}>Change password</h2>
-        <label style={fieldStyle}>Current password<span className="fk-password-control"><input style={inputStyle} type={showCurrentPassword ? 'text' : 'password'} autoComplete="current-password" required value={password.current_password} onChange={(e) => setPassword({ ...password, current_password: e.target.value })} /><button type="button" aria-label={showCurrentPassword ? 'Hide current password' : 'Show current password'} onClick={() => setShowCurrentPassword((visible) => !visible)}><EyeIcon visible={showCurrentPassword} /></button></span></label>
-        <label style={fieldStyle}>New password<span className="fk-password-control"><input style={inputStyle} type={showNewPassword ? 'text' : 'password'} autoComplete="new-password" minLength={8} required value={password.new_password} onChange={(e) => setPassword({ ...password, new_password: e.target.value })} /><button type="button" aria-label={showNewPassword ? 'Hide new password' : 'Show new password'} onClick={() => setShowNewPassword((visible) => !visible)}><EyeIcon visible={showNewPassword} /></button></span></label>
-        <button className="fk-checkout-submit" disabled={busy}>Update password</button>
-      </form>
-    </>}
+      <h1 className="fk-account-title">{title}</h1>
+      {notice.text && (
+        <p
+          role={notice.type === 'error' ? 'alert' : 'status'}
+          style={{
+            padding: 12,
+            borderRadius: 6,
+            color: notice.type === 'error' ? '#8a3228' : '#245842',
+            background: notice.type === 'error' ? '#fff3f0' : '#edf6ed',
+            fontSize: '13.5px',
+            marginBottom: '16px',
+          }}
+        >
+          {notice.text}
+        </p>
+      )}
+      {loading && <p role="status" className="fk-account-state">Loading account information…</p>}
 
-    {!loading && section === 'address' && <>
-      <div className="fk-address-list-card" style={cardStyle}>
-        <h2>Saved addresses</h2>
-        {addresses.length === 0 && <p className="fk-address-empty">No saved addresses yet. Add one below.</p>}
-        <div className="fk-address-grid">{addresses.map((item) => <article key={item.id} className="fk-saved-address-card">
-          <div className="fk-address-title"><strong>{item.label}</strong>{item.is_default && <span>Default</span>}</div>
-          <p><strong>{item.recipient_name}</strong><br />{item.mobile_number}</p>
-          <p>{[item.address_line1, item.address_line2, item.locality, item.city, item.state, item.pin_code].filter(Boolean).join(', ')}</p>
-          <div className="fk-address-actions">
-            <button type="button" className="fk-address-action" onClick={() => { setAddress({ ...blankAddress, ...item }); setEditingId(item.id); }}><Pencil size={15} /> Edit</button>
-            {!item.is_default && <button type="button" className="fk-address-action" onClick={async () => { try { await accountService.setDefaultAddress(item.id); await loadAddresses({ refresh: true }); await refreshAddresses({ refresh: true }); notify('success', 'Default address changed.'); } catch (error) { notify('error', error.message); } }}><Check size={15} /> Set as default</button>}
-            <button type="button" className="fk-address-action is-danger" onClick={async () => { try { await accountService.deleteAddress(item.id); await loadAddresses({ refresh: true }); await refreshAddresses({ refresh: true }); notify('success', 'Address deleted.'); } catch (error) { notify('error', error.message); } }}><Trash2 size={15} /> Delete</button>
+      {!loading && section === 'profile' && (
+        <>
+          <form onSubmit={saveProfile} className="fk-account-card">
+            <h2 style={{ marginTop: 0, fontSize: '17px', fontWeight: '700' }}>Personal details</h2>
+            <label className="fk-account-field">
+              Full name
+              <input
+                className="fk-account-input"
+                required
+                maxLength={120}
+                value={profile.name}
+                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+              />
+            </label>
+            <label className="fk-account-field">
+              Registered email
+              <input className="fk-account-input is-readonly" value={profile.email} readOnly />
+            </label>
+            <label className="fk-account-field">
+              Mobile number
+              <input
+                className="fk-account-input"
+                inputMode="tel"
+                minLength={10}
+                maxLength={15}
+                value={profile.mobile_number || ''}
+                onChange={(e) => setProfile({ ...profile, mobile_number: e.target.value })}
+              />
+            </label>
+            <button className="fk-checkout-submit" disabled={busy}>Save profile</button>
+          </form>
+          <form onSubmit={changePassword} className="fk-account-card">
+            <h2 style={{ marginTop: 0, fontSize: '17px', fontWeight: '700' }}>Change password</h2>
+            <label className="fk-account-field">
+              Current password
+              <span className="fk-password-control">
+                <input
+                  className="fk-account-input"
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  value={password.current_password}
+                  onChange={(e) => setPassword({ ...password, current_password: e.target.value })}
+                />
+                <button
+                  type="button"
+                  aria-label={showCurrentPassword ? 'Hide current password' : 'Show current password'}
+                  onClick={() => setShowCurrentPassword((visible) => !visible)}
+                >
+                  <EyeIcon visible={showCurrentPassword} />
+                </button>
+              </span>
+            </label>
+            <label className="fk-account-field">
+              New password
+              <span className="fk-password-control">
+                <input
+                  className="fk-account-input"
+                  type={showNewPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                  value={password.new_password}
+                  onChange={(e) => setPassword({ ...password, new_password: e.target.value })}
+                />
+                <button
+                  type="button"
+                  aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+                  onClick={() => setShowNewPassword((visible) => !visible)}
+                >
+                  <EyeIcon visible={showNewPassword} />
+                </button>
+              </span>
+            </label>
+            <button className="fk-checkout-submit" disabled={busy}>Update password</button>
+          </form>
+        </>
+      )}
+
+      {!loading && section === 'address' && (
+        <>
+          <div className="fk-account-card">
+            <h2 style={{ marginTop: 0, fontSize: '17px', fontWeight: '700' }}>Saved addresses</h2>
+            {addresses.length === 0 && <p className="fk-address-empty">No saved addresses yet. Add one below.</p>}
+            <div className="fk-address-grid">
+              {addresses.map((item) => (
+                <article key={item.id} className="fk-saved-address-card">
+                  <div className="fk-address-title">
+                    <strong>{item.label}</strong>
+                    {item.is_default && <span>Default</span>}
+                  </div>
+                  <p>
+                    <strong>{item.recipient_name}</strong>
+                    <br />
+                    {item.mobile_number}
+                  </p>
+                  <p>{[item.address_line1, item.address_line2, item.locality, item.city, item.state, item.pin_code].filter(Boolean).join(', ')}</p>
+                  <div className="fk-address-actions">
+                    <button type="button" className="fk-address-action" onClick={() => { setAddress({ ...blankAddress, ...item }); setEditingId(item.id); }}>
+                      <Pencil size={14} /> Edit
+                    </button>
+                    {!item.is_default && (
+                      <button
+                        type="button"
+                        className="fk-address-action"
+                        onClick={async () => {
+                          try {
+                            await accountService.setDefaultAddress(item.id);
+                            await loadAddresses({ refresh: true });
+                            await refreshAddresses({ refresh: true });
+                            notify('success', 'Default address changed.');
+                          } catch (error) {
+                            notify('error', error.message);
+                          }
+                        }}
+                      >
+                        <Check size={14} /> Set as default
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="fk-address-action is-danger"
+                      onClick={async () => {
+                        try {
+                          await accountService.deleteAddress(item.id);
+                          await loadAddresses({ refresh: true });
+                          await refreshAddresses({ refresh: true });
+                          notify('success', 'Address deleted.');
+                        } catch (error) {
+                          notify('error', error.message);
+                        }
+                      }}
+                    >
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
-        </article>)}</div>
-      </div>
-      <form onSubmit={saveAddress} className="fk-address-form" style={cardStyle}>
-        <h2>{editingId ? 'Edit address' : 'Add an address'}</h2>
-        <div className="fk-checkout-fields">
-          {[["recipient_name","Recipient name"],["mobile_number","Mobile number"],["address_line1","Address line 1"],["address_line2","Address line 2"],["locality","Locality / landmark"],["city","City"],["state","State"],["pin_code","PIN code"]].map(([key,label]) => <label key={key} className={`${key === 'address_line1' || key === 'address_line2' ? 'fk-field-wide ' : ''}fk-address-field`}>{label}<input className="fk-address-input" required={key !== 'address_line2'} inputMode={key === 'pin_code' || key === 'mobile_number' ? 'numeric' : undefined} pattern={key === 'pin_code' ? '[0-9]{6}' : undefined} maxLength={key === 'pin_code' ? 6 : key === 'mobile_number' ? 15 : 240} value={address[key] || ''} onChange={(e) => setAddress({ ...address, [key]: e.target.value })} /></label>)}
-          <label className="fk-address-field">Label<select className="fk-address-input" value={address.label} onChange={(e) => setAddress({ ...address, label: e.target.value })}>{['Home','Work','Other'].map((label) => <option key={label}>{label}</option>)}</select></label>
-          <label className="fk-checkbox-row"><input className="fk-compact-checkbox" type="checkbox" checked={address.is_default} onChange={(e) => setAddress({ ...address, is_default: e.target.checked })} /> Set as default</label>
-        </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 15 }}><button className="fk-checkout-submit" disabled={busy}>{editingId ? 'Save address' : 'Add address'}</button>{editingId && <button type="button" className="fk-checkout-back" onClick={() => { setAddress(blankAddress); setEditingId(null); }}>Cancel</button>}</div>
-      </form>
-    </>}
+          <form onSubmit={saveAddress} className="fk-account-card">
+            <h2 style={{ marginTop: 0, fontSize: '17px', fontWeight: '700' }}>{editingId ? 'Edit address' : 'Add an address'}</h2>
+            <div className="fk-checkout-fields">
+              {[
+                ['recipient_name', 'Recipient name'],
+                ['mobile_number', 'Mobile number'],
+                ['address_line1', 'Address line 1'],
+                ['address_line2', 'Address line 2'],
+                ['locality', 'Locality / landmark'],
+                ['city', 'City'],
+                ['state', 'State'],
+                ['pin_code', 'PIN code'],
+              ].map(([key, label]) => (
+                <label key={key} className={`${key === 'address_line1' || key === 'address_line2' ? 'fk-field-wide ' : ''}fk-address-field`}>
+                  {label}
+                  <input
+                    className="fk-address-input"
+                    required={key !== 'address_line2'}
+                    inputMode={key === 'pin_code' || key === 'mobile_number' ? 'numeric' : undefined}
+                    pattern={key === 'pin_code' ? '[0-9]{6}' : undefined}
+                    maxLength={key === 'pin_code' ? 6 : key === 'mobile_number' ? 15 : 240}
+                    value={address[key] || ''}
+                    onChange={(e) => setAddress({ ...address, [key]: e.target.value })}
+                  />
+                </label>
+              ))}
+              <label className="fk-address-field">
+                Label
+                <select className="fk-address-input" value={address.label} onChange={(e) => setAddress({ ...address, label: e.target.value })}>
+                  {['Home', 'Work', 'Other'].map((label) => (
+                    <option key={label}>{label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="fk-checkbox-row">
+                <input className="fk-compact-checkbox" type="checkbox" checked={address.is_default} onChange={(e) => setAddress({ ...address, is_default: e.target.checked })} />
+                Set as default
+              </label>
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 15 }}>
+              <button className="fk-checkout-submit" disabled={busy}>{editingId ? 'Save address' : 'Add address'}</button>
+              {editingId && (
+                <button type="button" className="fk-checkout-back" onClick={() => { setAddress(blankAddress); setEditingId(null); }}>
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+        </>
+      )}
 
-    {!loading && section === 'payments' && <div style={cardStyle}>
-      <h2 style={{ marginTop: 0, fontSize: 18 }}>Preferred payment method</h2>
-      <p>Choose a preference. Checkout shows only methods supported by every item in your order and your current payment configuration.</p>
-      <label style={fieldStyle}>Preference<select style={inputStyle} value={preference} onChange={(e) => setPreference(e.target.value)}><option value="">No preference</option><option value="cod">Cash on Delivery</option><option value="upi">UPI through Razorpay</option><option value="netbanking">Net Banking through Razorpay</option></select></label>
-      <button className="fk-checkout-submit" disabled={busy} onClick={async () => { setBusy(true); try { await accountService.savePaymentPreference(preference || null); notify('success', 'Payment preference saved.'); } catch (error) { notify('error', error.message || 'Preference could not be saved.'); } finally { setBusy(false); } }}>Save preference</button>
-      <p style={{ marginBottom: 0, color: 'var(--fk-text-muted)', fontSize: 13 }}>Payment credentials and non-tokenized instruments are never stored in your account.</p>
-    </div>}
-  </section>;
+      {!loading && section === 'payments' && (
+        <div className="fk-account-card">
+          <h2 style={{ marginTop: 0, fontSize: '17px', fontWeight: '700' }}>Payment Methods</h2>
+          <p style={{ fontSize: '13.5px', color: 'var(--fk-text-muted)', lineHeight: 1.5, marginTop: '8px' }}>
+            Flatkart supports Cash on Delivery, UPI through Razorpay, and Net Banking at checkout.
+          </p>
+          <div style={{ marginTop: '16px', padding: '14px 16px', backgroundColor: 'var(--fk-background, #F4F1EA)', borderRadius: '8px', fontSize: '13px', color: 'var(--fk-text-primary)' }}>
+            <p style={{ margin: 0, fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>🔒</span> Secure Payments
+            </p>
+            <p style={{ margin: '6px 0 0', color: 'var(--fk-text-muted)', fontSize: '12px', lineHeight: 1.45 }}>
+              Payment credentials and non-tokenized instruments are never stored on your account. Choose your preferred method seamlessly during checkout.
+            </p>
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }
 
-export function MyAccount({ section = 'profile', onNavigate }) {
+export function MyAccount({ section = 'overview', onNavigate }) {
   const { user, setUser } = useAuth();
   const { setIsWishlistOpen } = useCart();
   const [chatOpen, setChatOpen] = useState(false);
   const [orderFilter, setOrderFilter] = useState('all');
   const [resetOrderTrigger, setResetOrderTrigger] = useState(0);
 
-  const validSection = ['profile', 'address', 'payments', 'orders', 'support-tickets', 'wishlist'].includes(section) ? section : 'profile';
+  const validSection = ['overview', 'profile', 'address', 'payments', 'orders', 'support-tickets', 'wishlist'].includes(section) ? section : 'overview';
   useEffect(() => {
     if (validSection === 'wishlist') setIsWishlistOpen(true);
   }, [validSection, setIsWishlistOpen]);
@@ -210,15 +392,42 @@ export function MyAccount({ section = 'profile', onNavigate }) {
       extraNavAction={navOrderActions}
       scrollable
     >
-      {['profile', 'address', 'payments'].includes(validSection)
-        ? <AccountSection key={validSection} section={validSection} onProfileSaved={(value) => { setUser({ ...user, ...value }); localStorage.setItem('flatkart_user', JSON.stringify({ ...user, ...value })); }} />
-        : validSection === 'orders' ? <AccountOrders filter={orderFilter} onFilterChange={setOrderFilter} resetTrigger={resetOrderTrigger} onStartReturnIntake={handleStartReturnIntake} onNavigate={onNavigate} />
-          : validSection === 'support-tickets' ? <AccountSupportTickets />
-            : <section style={{ padding: 28 }}><h1>Wishlist</h1><p>Your saved products are available in the wishlist panel.</p></section>}
+      {validSection === 'overview' ? (
+        <AccountOverview
+          onNavigate={onNavigate}
+          onOpenWishlist={() => setIsWishlistOpen(true)}
+          onToggleChatbot={() => setChatOpen((open) => !open)}
+        />
+      ) : ['profile', 'address', 'payments'].includes(validSection) ? (
+        <AccountSection
+          key={validSection}
+          section={validSection}
+          onNavigate={onNavigate}
+          onProfileSaved={(value) => {
+            setUser({ ...user, ...value });
+            localStorage.setItem('flatkart_user', JSON.stringify({ ...user, ...value }));
+          }}
+        />
+      ) : validSection === 'orders' ? (
+        <AccountOrders
+          filter={orderFilter}
+          onFilterChange={setOrderFilter}
+          resetTrigger={resetOrderTrigger}
+          onStartReturnIntake={handleStartReturnIntake}
+          onNavigate={onNavigate}
+        />
+      ) : validSection === 'support-tickets' ? (
+        <AccountSupportTickets onNavigate={onNavigate} />
+      ) : (
+        <section style={{ padding: 28 }}>
+          <h1>Wishlist</h1>
+          <p>Your saved products are available in the wishlist panel.</p>
+        </section>
+      )}
     </AccountLayout>
     <WishlistDrawer onNavigate={onNavigate} />
     <CartDrawer onNavigate={onNavigate} />
-    <ChatbotWidget isOpen={chatOpen} onToggle={() => setChatOpen((open) => !open)} onNavigate={onNavigate} />
+    <ChatbotWidget isOpen={chatOpen} onToggle={() => setChatOpen((open) => !open)} onNavigate={onNavigate} currentPage="account" />
   </>;
 }
 

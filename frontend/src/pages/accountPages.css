@@ -1628,16 +1628,95 @@
   }
 }
 
-@media (max-width: 520px) {
-  .fk-pre-delivery-product {
+@media (max-width: 640px) {
+  .fk-orders-container {
+    padding: 12px 10px 32px;
+  }
+
+  .fk-orders-header-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 14px;
+    gap: 12px;
+  }
+
+  .fk-orders-title {
+    font-size: 22px;
+  }
+
+  .fk-nav-order-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fk-order-card-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .fk-order-summary-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fk-order-summary-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .fk-order-card-body {
+    padding: 16px 12px;
+  }
+
+  .fk-pre-delivery-main-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .fk-tracking-modal-content,
+  .fk-cancel-modal-content {
+    width: min(540px, calc(100vw - 20px));
+    max-height: 85vh;
+  }
+
+  .fk-account-page {
+    padding: 16px 12px 32px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .fk-page-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .fk-ticket-top {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .fk-ticket-meta {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 520px) {
+  .fk-pre-delivery-product {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
   }
 
   .fk-pre-delivery-product .fk-product-image-box {
-    width: 100%;
-    height: 160px;
+    width: 80px;
+    height: 80px;
+    padding: 6px;
+    border-radius: 8px;
+    flex-shrink: 0;
   }
 
   .fk-pre-delivery-notice {
@@ -1665,3 +1744,357 @@
 .fk-account-empty { display: grid; justify-items: center; gap: 9px; border: 1px dashed #d1d5db; border-radius: 10px; background: #fff; }
 .fk-account-empty strong { color: #111827; }
 .fk-account-empty p { max-width: 430px; margin: 0; font-size: 13px; }
+
+/* ============================================================
+   MOBILE ACCOUNT OVERVIEW & FLUID TYPOGRAPHY ENHANCEMENTS
+   ============================================================ */
+.fk-account-overview-container {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 14px 14px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fk-account-user-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background-color: #FFFFFF;
+  border: 1px solid #EAE6DB;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.fk-account-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.fk-account-user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--fk-header, #122D29);
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.fk-account-user-greeting {
+  font-size: 16px;
+  font-weight: 750;
+  color: var(--fk-text-primary, #1C352F);
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fk-account-user-email {
+  font-size: 12px;
+  color: var(--fk-text-muted, #70797B);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fk-account-help-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid #D8D4C7;
+  border-radius: 20px;
+  background-color: #F8F7F3;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fk-text-primary, #1C352F);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
+}
+
+.fk-account-help-btn:hover {
+  background-color: #ECE8DE;
+}
+
+/* Side-by-Side Quick Access Tiles */
+.fk-account-quick-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.fk-account-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background-color: #FFFFFF;
+  border: 1px solid #EAE6DB;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fk-account-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.fk-account-tile-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background-color: #F4F1EA;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.fk-account-tile-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fk-text-primary, #1C352F);
+}
+
+/* Account Navigation List */
+.fk-account-menu-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EAE6DB;
+  border-radius: 12px;
+  padding: 4px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.fk-account-menu-heading {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fk-text-muted, #70797B);
+  padding: 12px 16px 6px;
+  margin: 0;
+}
+
+.fk-account-menu-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.fk-account-menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  border: none;
+  background: none;
+  width: 100%;
+  cursor: pointer;
+  border-bottom: 1px solid #F4F1EA;
+  transition: background-color 0.12s ease;
+  font-family: inherit;
+  text-align: left;
+}
+
+.fk-account-menu-row:last-child {
+  border-bottom: none;
+}
+
+.fk-account-menu-row:hover {
+  background-color: #FAF8F4;
+}
+
+.fk-account-menu-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fk-account-menu-icon-wrapper {
+  color: var(--fk-text-muted, #70797B);
+  display: flex;
+  align-items: center;
+}
+
+.fk-account-menu-row-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--fk-text-primary, #1C352F);
+}
+
+.fk-account-menu-row-chevron {
+  color: #9CA3AF;
+  flex-shrink: 0;
+}
+
+/* Logout Card */
+.fk-account-logout-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EAE6DB;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.fk-account-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--fk-price-coral, #C05B4B);
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+  font-family: inherit;
+}
+
+.fk-account-logout-btn:hover {
+  background-color: #FDF4F2;
+}
+
+/* Mobile Back Button for sub-pages */
+.fk-mobile-back-account {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  margin-bottom: 14px;
+  background-color: #FFFFFF;
+  border: 1px solid #EAE6DB;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--fk-text-primary, #1C352F);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.fk-mobile-back-account:hover {
+  background-color: #F8F7F3;
+}
+
+/* General Account Fluid Typography & Form Wrapping */
+.fk-account-title {
+  font-size: clamp(20px, 3.8vw, 26px);
+  font-weight: 800;
+  color: var(--fk-text-primary, #1C352F);
+  margin-bottom: 12px;
+}
+
+.fk-account-subheading {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fk-text-primary, #1C352F);
+  margin-bottom: 8px;
+}
+
+.fk-account-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EAE6DB;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.fk-account-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--fk-text-primary, #1c352f);
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.fk-account-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #D8D4C8;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--fk-text-primary, #1c352f);
+  background-color: #FFFFFF;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.fk-account-input:focus {
+  border-color: var(--fk-gold);
+  box-shadow: 0 0 0 2px rgba(194, 161, 90, 0.2);
+}
+
+.fk-account-input.is-readonly {
+  background-color: #F8F7F3;
+  color: var(--fk-text-muted);
+  cursor: not-allowed;
+}
+
+.fk-password-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.fk-password-control .fk-account-input {
+  padding-right: 44px;
+}
+
+.fk-password-control button {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  color: #70797B;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+@media (max-width: 768px) {
+  .fk-account-sidebar {
+    display: none !important;
+  }
+  .fk-account-layout {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+  .fk-address-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .fk-saved-address-card {
+    width: 100% !important;
+  }
+  .fk-account-page.fk-support-page {
+    padding: 14px 12px 32px;
+  }
+  .fk-ticket-card {
+    padding: 14px;
+  }
+}

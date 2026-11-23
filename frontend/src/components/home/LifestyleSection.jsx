@@ -23,9 +23,9 @@ export function LifestyleSection({ onSelectCategory, categories = [], products =
       </div>
 
       <div
+        className="fk-lifestyle-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
           gap: '18px',
         }}
       >

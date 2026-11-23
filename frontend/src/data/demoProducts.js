@@ -196,22 +196,22 @@ export const POPULAR_BRANDS = [
 export const WHY_FLATKART_POINTS = [
   {
     id: 1,
-    title: 'Curated Selections',
-    description: 'Every product is handpicked for craftsmanship, durability, and honest value.',
+    title: 'Find Your Style',
+    description: 'Handpicked products for craftsmanship, quality, and honest value.',
   },
   {
     id: 2,
     title: 'Useful Product Details',
-    description: 'Clear sizing, real material specifications, and honest product imagery.',
+    description: 'Clear sizing, real material specifications, and honest imagery.',
   },
   {
     id: 3,
     title: 'Complaint Tracking',
-    description: 'AI-assisted routing directly directs issues to the right department team.',
+    description: 'Fast, automated routing of issues directly to the right team.',
   },
   {
     id: 4,
     title: 'Help and Support',
-    description: 'Transparent resolution tracking with dedicated resolution officers.',
+    description: 'Transparent issue resolution with dedicated support officers.',
   },
 ];

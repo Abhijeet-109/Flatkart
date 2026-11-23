@@ -5,19 +5,19 @@ export function FeaturedCollectionBanner({ onExplore }) {
   return (
     <section className="fk-featured-section">
       <div
+        className="fk-featured-collection-banner"
         style={{
           borderRadius: '8px',
           overflow: 'hidden',
           backgroundColor: 'var(--fk-hero)',
           boxShadow: '0 4px 14px rgba(0, 0, 0, 0.06)',
           display: 'grid',
-          gridTemplateColumns: '1.2fr 1fr',
           minHeight: '220px',
         }}
       >
         <div
+          className="fk-featured-collection-content"
           style={{
-            padding: '36px 42px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',

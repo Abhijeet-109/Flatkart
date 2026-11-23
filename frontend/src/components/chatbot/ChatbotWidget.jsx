@@ -7,7 +7,41 @@ import './chatbot.css';
 
 const AssistantMessageContent = lazy(() => import('./AssistantMessageContent'));
 
-export function ChatbotWidget({ isOpen, onToggle, onNavigate, returnIntakeRequest = null }) {
+const RYAN_PROCESSING_MESSAGES = [
+  'Thinking…',
+  'Looking through Flatkart knowledge base…',
+  'Processing your question…',
+  'Preparing a helpful response…',
+];
+
+function RyanLoadingIndicator() {
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMessageIndex((prev) => Math.min(prev + 1, RYAN_PROCESSING_MESSAGES.length - 1));
+    }, 2200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="fk-chat-bubble bot fk-ryan-loading-bubble">
+      <div className="fk-ryan-loading-indicator">
+        <div className="fk-ryan-loading-avatar">
+          <Bot size={16} color="var(--fk-gold)" />
+        </div>
+        <div className="fk-ryan-loading-content">
+          <span className="fk-ryan-loading-text">{RYAN_PROCESSING_MESSAGES[messageIndex]}</span>
+          <div className="fk-ryan-loading-dots">
+            <span /><span /><span />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ChatbotWidget({ isOpen, onToggle, onNavigate, returnIntakeRequest = null, currentPage = 'home' }) {
   const { user, isAuthenticated } = useAuth();
   const authenticatedUserId = isAuthenticated && user?.id !== null && user?.id !== undefined
     ? String(user.id)
@@ -15,10 +49,23 @@ export function ChatbotWidget({ isOpen, onToggle, onNavigate, returnIntakeReques
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const isAccountOrCart = currentPage === 'account' || currentPage === 'cart' || currentPage === 'my-conversations';
+  const [showPrompt, setShowPrompt] = useState(() => !isAccountOrCart);
   const messagesEndRef = useRef(null);
   const activeUserIdRef = useRef(authenticatedUserId);
   const requestGenerationRef = useRef(0);
   const handledReturnIntakeRef = useRef(null);
+
+  useEffect(() => {
+    if (isAccountOrCart) {
+      setShowPrompt(false);
+      return undefined;
+    }
+    const timer = setTimeout(() => {
+      setShowPrompt(false);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [isAccountOrCart, currentPage]);
 
   // Initialize or reset messages when authentication state changes
   useLayoutEffect(() => {
@@ -157,24 +204,23 @@ export function ChatbotWidget({ isOpen, onToggle, onNavigate, returnIntakeReques
 
   return (
     <>
-      {/* Floating Pebble Widget Button (Screenshot replica) */}
+      {/* Ryan Floating Companion Widget */}
       <div
-        className="fk-floating-help-widget"
+        className={`fk-ryan-widget is-page-${currentPage || 'default'}`}
         onClick={onToggle}
-        title="Need help? Click to open assistant"
+        title="Chat with Ryan, your AI shopping assistant"
         role="button"
         tabIndex={0}
-        aria-label="Toggle Flatkart AI Help Assistant"
+        aria-label="Toggle Ryan AI Assistant"
       >
-        <div className="fk-help-pebble-card">
-          <div className="fk-help-title">Need help?</div>
-          <div className="fk-help-desc">
-            We're here<br />to assist you.
+        {showPrompt && (
+          <div className="fk-ryan-bubble-prompt">
+            <span>Ask Ryan</span>
           </div>
-          <div className="fk-help-divider" />
-          <div className={`fk-help-circle-toggle ${isOpen ? 'open' : ''}`}>
-            <ChevronDown size={20} strokeWidth={2.5} />
-          </div>
+        )}
+        <div className="fk-ryan-avatar-badge">
+          <Bot size={22} strokeWidth={2.2} color="#FFFFFF" />
+          <span className="fk-ryan-online-dot" />
         </div>
       </div>
 
@@ -184,8 +230,13 @@ export function ChatbotWidget({ isOpen, onToggle, onNavigate, returnIntakeReques
           <div className="fk-chatbot-window" onClick={(e) => e.stopPropagation()}>
             <div className="fk-chatbot-header">
               <div className="fk-chatbot-header-title">
-                <Bot size={20} color="var(--fk-gold)" />
-                <span>Flatkart AI Support</span>
+                <div className="fk-ryan-modal-avatar">
+                  <Bot size={20} color="var(--fk-gold)" />
+                </div>
+                <div>
+                  <div style={{ fontWeight: '700', fontSize: '15px', color: '#ffffff', lineHeight: 1.2 }}>Ryan</div>
+                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>AI Shopping &amp; Support</div>
+                </div>
               </div>
               <button
                 className="fk-chatbot-header-close"
@@ -267,69 +318,33 @@ export function ChatbotWidget({ isOpen, onToggle, onNavigate, returnIntakeReques
                 </div>
               ))}
 
-              {isLoading && (
-                <div className="fk-chat-bubble bot" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Sparkles size={16} className="fk-chat-loading-spinner" color="var(--fk-gold)" />
-                  <span>Searching Flatkart documents with AI...</span>
-                </div>
-              )}
+              {isLoading && <RyanLoadingIndicator />}
               <div ref={messagesEndRef} />
             </div>
 
             {/* Quick Inquiry Buttons (only for authenticated users) */}
             {isAuthenticated && (
-              <div
-                style={{
-                  padding: '8px 16px',
-                  background: '#F4F1EA',
-                  display: 'flex',
-                  gap: '6px',
-                  flexWrap: 'wrap',
-                  minWidth: 0,
-                  borderTop: '1px solid #EFECE4',
-                }}
-              >
+              <div className="fk-chatbot-quick-questions">
                 <button
-                  style={{
-                    fontSize: '11.5px',
-                    padding: '4px 8px',
-                    background: '#FFFFFF',
-                    border: '1px solid #D8D4C8',
-                    borderRadius: '12px',
-                    whiteSpace: 'normal',
-                    cursor: 'pointer',
-                  }}
+                  type="button"
+                  className="fk-chatbot-quick-btn"
                   onClick={() => handleQuickQuestion("What is Flatkart's return and refund policy?")}
                 >
-                  🔄 Return Policy
+                  <span>🔄</span> Return Policy
                 </button>
                 <button
-                  style={{
-                    fontSize: '11.5px',
-                    padding: '4px 8px',
-                    background: '#FFFFFF',
-                    border: '1px solid #D8D4C8',
-                    borderRadius: '12px',
-                    whiteSpace: 'normal',
-                    cursor: 'pointer',
-                  }}
+                  type="button"
+                  className="fk-chatbot-quick-btn"
                   onClick={() => handleQuickQuestion('What are the shipping and delivery options?')}
                 >
-                  🚚 Delivery Options
+                  <span>🚚</span> Delivery Options
                 </button>
                 <button
-                  style={{
-                    fontSize: '11.5px',
-                    padding: '4px 8px',
-                    background: '#FFFFFF',
-                    border: '1px solid #D8D4C8',
-                    borderRadius: '12px',
-                    whiteSpace: 'normal',
-                    cursor: 'pointer',
-                  }}
+                  type="button"
+                  className="fk-chatbot-quick-btn"
                   onClick={() => handleQuickQuestion('What payment methods are supported?')}
                 >
-                  💳 Payment Methods
+                  <span>💳</span> Payment Methods
                 </button>
               </div>
             )}

@@ -86,6 +86,78 @@ FOLLOW_UP_FRAGMENT_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+GREETING_PATTERN = re.compile(
+    r"^(?:hi|hello|hey|heya|howdy|good\s+(?:morning|afternoon|evening))\b[\s!.,?]*$",
+    re.IGNORECASE,
+)
+BOT_IDENTITY_PATTERN = re.compile(
+    r"^(?:who\s+are\s+you|what\s+is\s+your\s+name|what\s+can\s+you\s+do|help\s+me)\b[\s!.,?]*$",
+    re.IGNORECASE,
+)
+OUT_OF_SCOPE_PATTERNS = (
+    (
+        "coding",
+        re.compile(
+            r"\b(?:write|debug|fix|explain|generate|solve|create)\b.{0,40}\b(?:python|javascript|typescript|c\+\+|java|rust|golang|html|css|sql|react|node|algorithm|regex|code|script|function|program|class)\b"
+            r"|\b(?:leetcode|fizzbuzz|quicksort|binary\s+search|bubble\s+sort|fibonacci)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "weather",
+        re.compile(
+            r"\b(?:what(?:\'s|\s+is)\s+the\s+weather|is\s+it\s+raining|temperature\s+in|weather\s+forecast)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "politics",
+        re.compile(
+            r"\b(?:who\s+should\s+i\s+vote\s+for|prime\s+minister\s+of|president\s+of|election\s+results|political\s+party|political\s+news)\b",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "romance",
+        re.compile(
+            r"\b(?:will\s+you\s+marry\s+me|i\s+love\s+you|do\s+you\s+love\s+me|be\s+my\s+(?:girlfriend|boyfriend|date))\b",
+            re.IGNORECASE,
+        ),
+    ),
+)
+
+
+def detect_cheap_handling(question: str) -> tuple[str, str] | None:
+    """
+    Deterministically identify greetings and obvious out-of-scope requests.
+    Returns (category, canned_answer) or None to pass through to normal pipeline.
+    """
+    if not isinstance(question, str) or not question.strip():
+        return None
+
+    normalized = re.sub(r"\s+", " ", question).strip()
+
+    if GREETING_PATTERN.match(normalized):
+        return (
+            "greeting",
+            "Hello! I'm Ryan, your Flatkart shopping and support assistant. How can I help you today with your orders, products, returns, or deliveries?",
+        )
+
+    if BOT_IDENTITY_PATTERN.match(normalized):
+        return (
+            "identity",
+            "I'm Ryan, Flatkart's AI assistant. I can help you find products, track orders, manage returns and refunds, answer shipping questions, and assist with your account!",
+        )
+
+    for category, pattern in OUT_OF_SCOPE_PATTERNS:
+        if pattern.search(normalized):
+            return (
+                category,
+                "I specialize in assisting with Flatkart products, orders, shipping, and returns. I'm unable to help with general questions outside of shopping on Flatkart, but let me know if you need help with anything in our store!",
+            )
+
+    return None
+
 if not os.getenv("GROQ_API_KEY"):
     raise ValueError("GROQ_API_KEY is missing from the .env file")
 
@@ -343,6 +415,18 @@ def answer_question(question: str, chat_history) -> dict:
     Validate input, use checkpointed thread history, rewrite follow-up
     queries, retrieve documents, generate and validate the answer.
     """
+    # Deterministic low-cost prefilter for greetings and obvious out-of-scope queries
+    cheap_match = detect_cheap_handling(question)
+    if cheap_match:
+        cheap_category, canned_answer = cheap_match
+        logger.info(
+            "[CHATBOT] Request handled cheaply in pipeline. Category: %s",
+            cheap_category,
+        )
+        return {
+            "answer": canned_answer,
+            "sources": [],
+        }
 
     # Validate the question before retrieval
     rejection_message = validate_question(question)
