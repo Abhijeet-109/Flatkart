@@ -106,14 +106,15 @@ jobs:
           curl -fsS http://127.0.0.1:8000/openapi.json >/dev/null
           nginx -t
 
+          # Idempotent cleanup for previous attempts or retries of the same commit
           if docker container inspect "$ROLLBACK_CONTAINER" >/dev/null 2>&1; then
-            echo "Rollback container already exists. Stop to preserve existing backup."
-            exit 1
+            echo "Cleaning up stale rollback container from previous attempt: $ROLLBACK_CONTAINER"
+            docker rm -f "$ROLLBACK_CONTAINER" >/dev/null 2>&1 || true
           fi
 
-          if [ -e "$WEB_BACKUP" ] || [ -e "$WEB_STAGE" ] || [ -e "$WEB_FAILED" ]; then
-            echo "Deployment backup/staging path already exists. Stop for inspection."
-            exit 1
+          if [ -e "$WEB_STAGE" ] || [ -e "$WEB_FAILED" ] || [ -e "$WEB_BACKUP" ]; then
+            echo "Cleaning up stale staging and backup paths from previous attempt..."
+            rm -rf "$WEB_STAGE" "$WEB_FAILED" "$WEB_BACKUP"
           fi
 
           echo "Production services are healthy."
@@ -137,8 +138,8 @@ jobs:
           fi
 
           if [ -e "$RELEASE_DIR" ]; then
-            echo "Release directory already exists. Refusing to overwrite."
-            exit 1
+            echo "Release directory already exists from previous attempt. Cleaning up for fresh deployment..."
+            rm -rf "$RELEASE_DIR"
           fi
 
           install -d -o ubuntu -g ubuntu "$RELEASE_DIR"
@@ -299,6 +300,12 @@ jobs:
             rollback_backend
             exit 1
           fi
+
+          echo
+          echo "========== CLEANUP =========="
+          echo "Removing temporary release directory to free disk space..."
+          rm -rf "$RELEASE_DIR"
+          docker image prune -f >/dev/null 2>&1 || true
 
           echo
           echo "========== DEPLOYMENT SUCCESSFUL =========="
