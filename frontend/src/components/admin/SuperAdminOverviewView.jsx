@@ -32,6 +32,7 @@ export function SuperAdminOverviewView({
   onNavigate,
   onRefresh,
   isSuperAdmin = true,
+  loading = false,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -185,14 +186,14 @@ export function SuperAdminOverviewView({
   };
 
   return (
-    <div className="ad-overview-container">
+    <div className="hd-page ad-overview-container">
       {/* 0. Header Row */}
-      <div className="ad-header-row">
+      <div className="hd-page-header ad-header-row">
         <div>
-          <h1 className="ad-page-heading">Overview</h1>
-          <p className="ad-page-subtext">
+          <h2 className="hd-page-title ad-page-heading">Overview</h2>
+          <span className="hd-page-subtitle ad-page-subtext">
             Operational snapshot across the complaint redirection system.
-          </p>
+          </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div className="ad-live-pill">Live System Data</div>
@@ -200,13 +201,13 @@ export function SuperAdminOverviewView({
             type="button"
             className="ad-refresh-circle-btn"
             onClick={handleRefreshClick}
-            disabled={refreshing}
+            disabled={refreshing || loading}
             title="Refresh dashboard data"
             aria-label="Refresh dashboard data"
           >
             <RefreshCw
               size={15}
-              className={refreshing ? 'ad-spin-icon' : ''}
+              className={refreshing || loading ? 'ad-spin-icon' : ''}
             />
           </button>
         </div>

@@ -82,12 +82,21 @@ export function SharedAdminDashboard({ isSuperAdmin = false, onNavigate }) {
     setLoading(true);
     setError(null);
     try {
-      const [usersRes, deptsRes, complaintsRes, redirRes] = await Promise.all([
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timeout')), 8000)
+      );
+
+      const fetchPromise = Promise.all([
         adminService.getUsers().catch(() => []),
         adminService.getDepartments().catch(() => []),
         adminService.getComplaints().catch(() => []),
         adminService.getRedirectionKpis().catch(() => ({ summary: {}, by_department_route: [] })),
       ]);
+
+      const [usersRes, deptsRes, complaintsRes, redirRes] = await Promise.race([
+        fetchPromise,
+        timeoutPromise,
+      ]).catch(() => [[], [], [], { summary: {}, by_department_route: [] }]);
 
       const loadedComplaints = Array.isArray(complaintsRes) ? complaintsRes : [];
       setUsers(Array.isArray(usersRes) ? usersRes : []);
@@ -100,7 +109,6 @@ export function SharedAdminDashboard({ isSuperAdmin = false, onNavigate }) {
       }
     } catch (err) {
       console.error('Failed to load admin dashboard data:', err);
-      setError(err.message || 'Failed to load administrative data.');
     } finally {
       setLoading(false);
     }
@@ -202,167 +210,153 @@ export function SharedAdminDashboard({ isSuperAdmin = false, onNavigate }) {
         </div>
       )}
 
-      {/* Loading & Error States */}
-      {loading ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '350px', gap: '10px' }}>
-          <span>Loading operational data...</span>
-        </div>
-      ) : error ? (
-        <div className="hd-error-state">
+      {/* Non-blocking Error Banner */}
+      {error && (
+        <div className="hd-error-state" style={{ marginBottom: 16 }}>
           <div className="hd-error-icon">!</div>
-          <div className="hd-error-title">Unable to Load Admin Dashboard</div>
+          <div className="hd-error-title">Notice</div>
           <p className="hd-error-desc">{error}</p>
-          <button className="hd-retry-btn" onClick={loadDashboardData}>Try Again</button>
+          <button className="hd-retry-btn" onClick={loadDashboardData}>Retry</button>
         </div>
-      ) : (
-        <>
-          {currentView === 'products' && <ProductManagement />}
-          {currentView === 'categories' && <CategoryManagement />}
-          {currentView === 'shipment-options' && <ShipmentOptions />}
-          {currentView === 'store-dashboard' && <StoreDashboard onNavigate={handleNavigateView} />}
-          {currentView === 'orders' && <OrderManagement focusedOrderId={focusedOrderId} onClearFocusedOrder={() => setFocusedOrderId(null)} />}
-          {currentView === 'inventory' && <InventoryManagement />}
-          {currentView === 'payments' && <PaymentHistory focusedPaymentId={focusedPaymentId} onClearFocusedPayment={() => setFocusedPaymentId(null)} />}
-          {currentView === 'returns' && <RefundManagement />}
-          {/* ========================================================
-              VIEW 1: OVERVIEW (Super Admin Redesign)
-              ======================================================== */}
-          {currentView === 'overview' && (
-            <SuperAdminOverviewView
-              complaints={complaints}
-              departments={departments}
-              users={users}
-              redirectionData={redirectionData}
-              onNavigate={handleNavigateView}
-              onRefresh={loadDashboardData}
-              isSuperAdmin={isSuperAdmin}
-            />
-          )}
+      )}
 
-          {/* ========================================================
-              VIEW 2: MANAGE USERS
-              ======================================================== */}
-          {currentView === 'users' && (
-            <>
-              <div className="ad-header-row">
-                <div>
-                  <h1 className="ad-page-heading">Manage Users</h1>
-                  <p className="ad-page-subtext">View, filter, create, and manage registered customer accounts.</p>
-                </div>
-              </div>
-              <ManagementTable
-                title="Users"
-                type="user"
-                items={regularUsers}
-                onCreate={handleCreateUser}
-                onUpdate={handleUpdateUser}
-                onDelete={handleDeleteUser}
-              />
-            </>
-          )}
+      {currentView === 'products' && <ProductManagement />}
+      {currentView === 'categories' && <CategoryManagement />}
+      {currentView === 'shipment-options' && <ShipmentOptions />}
+      {currentView === 'store-dashboard' && <StoreDashboard onNavigate={handleNavigateView} />}
+      {currentView === 'orders' && <OrderManagement focusedOrderId={focusedOrderId} onClearFocusedOrder={() => setFocusedOrderId(null)} />}
+      {currentView === 'inventory' && <InventoryManagement />}
+      {currentView === 'payments' && <PaymentHistory focusedPaymentId={focusedPaymentId} onClearFocusedPayment={() => setFocusedPaymentId(null)} />}
+      {currentView === 'returns' && <RefundManagement />}
 
-          {/* ========================================================
-              VIEW 3: MANAGE DEPARTMENTS
-              ======================================================== */}
-          {currentView === 'departments' && (
-            <>
-              <div className="ad-header-row">
-                <div>
-                  <h1 className="ad-page-heading">Manage Departments</h1>
-                  <p className="ad-page-subtext">Define and oversee organizational departments and routing targets.</p>
-                </div>
-              </div>
-              <ManagementTable
-                title="Departments"
-                type="department"
-                items={departments}
-                onCreate={handleCreateDepartment}
-                onUpdate={handleUpdateDepartment}
-                onDelete={handleDeleteDepartment}
-              />
-            </>
-          )}
+      {/* ========================================================
+          VIEW 1: OVERVIEW (Super Admin Redesign)
+          ======================================================== */}
+      {currentView === 'overview' && (
+        <SuperAdminOverviewView
+          complaints={complaints}
+          departments={departments}
+          users={users}
+          redirectionData={redirectionData}
+          onNavigate={handleNavigateView}
+          onRefresh={loadDashboardData}
+          isSuperAdmin={isSuperAdmin}
+          loading={loading}
+        />
+      )}
 
-          {/* ========================================================
-              VIEW 4: MANAGE DEPARTMENT HANDLERS
-              ======================================================== */}
-          {currentView === 'handlers' && (
-            <>
-              <div className="ad-header-row">
-                <div>
-                  <h1 className="ad-page-heading">Manage Department Handlers</h1>
-                  <p className="ad-page-subtext">Assign and manage department staff responsible for complaint resolution.</p>
-                </div>
-              </div>
-              <ManagementTable
-                title="Department Handlers"
-                type="handler"
-                items={departmentHandlers}
-                departments={departments}
-                onCreate={handleCreateUser}
-                onUpdate={handleUpdateUser}
-                onDelete={handleDeleteUser}
-              />
-            </>
-          )}
+      {/* ========================================================
+          VIEW 2: MANAGE USERS
+          ======================================================== */}
+      {currentView === 'users' && (
+        <div className="hd-page">
+          <div className="hd-page-header">
+            <h2 className="hd-page-title">Manage Users</h2>
+            <span className="hd-page-subtitle">View, filter, create, and manage registered customer accounts.</span>
+          </div>
+          <ManagementTable
+            title="Users"
+            type="user"
+            items={regularUsers}
+            onCreate={handleCreateUser}
+            onUpdate={handleUpdateUser}
+            onDelete={handleDeleteUser}
+          />
+        </div>
+      )}
 
-          {/* ========================================================
-              VIEW 5: MANAGE ADMINS (SUPER ADMIN ONLY)
-              ======================================================== */}
-          {currentView === 'admins' && isSuperAdmin && (
-            <>
-              <div className="ad-header-row">
-                <div>
-                  <h1 className="ad-page-heading">Manage Admins</h1>
-                  <p className="ad-page-subtext">Super Admin control for administrator staff accounts and roles.</p>
-                </div>
-              </div>
-              <ManagementTable
-                title="Admins"
-                type="admin"
-                items={adminUsers}
-                onCreate={handleCreateUser}
-                onUpdate={handleUpdateUser}
-                onDelete={handleDeleteUser}
-              />
-            </>
-          )}
+      {/* ========================================================
+          VIEW 3: MANAGE DEPARTMENTS
+          ======================================================== */}
+      {currentView === 'departments' && (
+        <div className="hd-page">
+          <div className="hd-page-header">
+            <h2 className="hd-page-title">Manage Departments</h2>
+            <span className="hd-page-subtitle">Define and oversee organizational departments and routing targets.</span>
+          </div>
+          <ManagementTable
+            title="Departments"
+            type="department"
+            items={departments}
+            onCreate={handleCreateDepartment}
+            onUpdate={handleUpdateDepartment}
+            onDelete={handleDeleteDepartment}
+          />
+        </div>
+      )}
 
-          {/* ========================================================
-              VIEW 6: COMPLAINTS OVERSIGHT
-              ======================================================== */}
-          {currentView === 'complaints' && (
-            <ComplaintsOversightView
-              complaints={complaints}
-              departments={departments}
-              redirectionData={redirectionData}
-              focusedComplaintId={focusedComplaintId}
-              onClearFocusedComplaint={() => setFocusedComplaintId(null)}
-            />
-          )}
+      {/* ========================================================
+          VIEW 4: MANAGE DEPARTMENT HANDLERS
+          ======================================================== */}
+      {currentView === 'handlers' && (
+        <div className="hd-page">
+          <div className="hd-page-header">
+            <h2 className="hd-page-title">Manage Department Handlers</h2>
+            <span className="hd-page-subtitle">Assign and manage department staff responsible for complaint resolution.</span>
+          </div>
+          <ManagementTable
+            title="Department Handlers"
+            type="handler"
+            items={departmentHandlers}
+            departments={departments}
+            onCreate={handleCreateUser}
+            onUpdate={handleUpdateUser}
+            onDelete={handleDeleteUser}
+          />
+        </div>
+      )}
 
-          {/* ========================================================
-              VIEW 7: REDIRECTION ANALYTICS
-              ======================================================== */}
-          {currentView === 'analytics' && (
-            <>
-              <div className="ad-header-row">
-                <div>
-                  <h1 className="ad-page-heading">Redirection Analytics</h1>
-                  <p className="ad-page-subtext">Audit trail and department-to-department complaint routing metrics.</p>
-                </div>
-              </div>
-              <DepartmentRedirections redirectionData={redirectionData} isFullView={true} />
-            </>
-          )}
+      {/* ========================================================
+          VIEW 5: MANAGE ADMINS (SUPER ADMIN ONLY)
+          ======================================================== */}
+      {currentView === 'admins' && isSuperAdmin && (
+        <div className="hd-page">
+          <div className="hd-page-header">
+            <h2 className="hd-page-title">Manage Admins</h2>
+            <span className="hd-page-subtitle">Super Admin control for administrator staff accounts and roles.</span>
+          </div>
+          <ManagementTable
+            title="Admins"
+            type="admin"
+            items={adminUsers}
+            onCreate={handleCreateUser}
+            onUpdate={handleUpdateUser}
+            onDelete={handleDeleteUser}
+          />
+        </div>
+      )}
 
-          {/* ========================================================
-              VIEW 8: CHATBOT & PIPELINE (SUPER ADMIN ONLY)
-              ======================================================== */}
-          {currentView === 'pipeline' && isSuperAdmin && (
-            <PipelineManagementView />
-          )}
-        </>
+      {/* ========================================================
+          VIEW 6: COMPLAINTS OVERSIGHT
+          ======================================================== */}
+      {currentView === 'complaints' && (
+        <ComplaintsOversightView
+          complaints={complaints}
+          departments={departments}
+          redirectionData={redirectionData}
+          focusedComplaintId={focusedComplaintId}
+          onClearFocusedComplaint={() => setFocusedComplaintId(null)}
+        />
+      )}
+
+      {/* ========================================================
+          VIEW 7: REDIRECTION ANALYTICS
+          ======================================================== */}
+      {currentView === 'analytics' && (
+        <div className="hd-page">
+          <div className="hd-page-header">
+            <h2 className="hd-page-title">Redirection Analytics</h2>
+            <span className="hd-page-subtitle">Audit trail and department-to-department complaint routing metrics.</span>
+          </div>
+          <DepartmentRedirections redirectionData={redirectionData} isFullView={true} />
+        </div>
+      )}
+
+      {/* ========================================================
+          VIEW 8: CHATBOT & PIPELINE (SUPER ADMIN ONLY)
+          ======================================================== */}
+      {currentView === 'pipeline' && isSuperAdmin && (
+        <PipelineManagementView />
       )}
     </AdminLayout>
   );

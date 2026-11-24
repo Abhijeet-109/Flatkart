@@ -15,7 +15,7 @@ export function AdminSidebar({
   collapsed = false,
   setCollapsed,
 }) {
-  const { logout } = useAuth();
+  const { logout } = useAuth() || {};
 
   const handleSignOut = () => {
     logout();

@@ -2,6 +2,14 @@
    Flatkart Admin & Super Admin Dashboard Styles
    ============================================================ */
 
+:root {
+  --fk-text-primary: #1C352F;
+  --fk-background: #F4F1EA;
+  --fk-header: #122D29;
+  --fk-olive: #8A875D;
+  --fk-gold: #C2A15A;
+}
+
 /* ============================================================
    Viewport bounding & Zoom Compensation (#root { zoom: 1.1 })
    Matching HandlerDashboard.css and .fk-account-layout
@@ -316,7 +324,7 @@ body:has(.ad-layout) {
 .ad-page-heading {
   font-size: 26px;
   font-weight: 800;
-  color: var(--fk-text-primary);
+  color: var(--fk-text-primary, #1C352F);
   line-height: 1.15;
   letter-spacing: -0.02em;
 }
