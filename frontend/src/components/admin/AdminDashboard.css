@@ -2,6 +2,15 @@
    Flatkart Admin & Super Admin Dashboard Styles
    ============================================================ */
 
+/* Major CSS issue fixed  */
+.ad-content {
+    display: block !important;
+    visibility: visible;
+    opacity: 1;
+    width: 100%;
+    min-width: 0;
+}
+
 .ad-layout {
   display: flex;
   min-height: 100vh;
