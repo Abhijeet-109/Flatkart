@@ -2,18 +2,34 @@
    Flatkart Admin & Super Admin Dashboard Styles
    ============================================================ */
 
-/* Major CSS issue fixed  */
-.ad-content {
-    display: block !important;
-    visibility: visible;
-    opacity: 1;
-    width: 100%;
-    min-width: 0;
+/* ============================================================
+   Viewport bounding & Zoom Compensation (#root { zoom: 1.1 })
+   Matching HandlerDashboard.css and .fk-account-layout
+   ============================================================ */
+html:has(.ad-layout),
+body:has(.ad-layout) {
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#root:has(.ad-layout) {
+  height: calc(100vh / var(--fk-zoom, 1.1));
+  max-height: calc(100vh / var(--fk-zoom, 1.1));
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .ad-layout {
   display: flex;
-  min-height: 100vh;
+  height: calc(100vh / var(--fk-zoom, 1.1));
+  max-height: calc(100vh / var(--fk-zoom, 1.1));
+  overflow: hidden;
+  position: relative;
+  width: 100%;
   background-color: var(--fk-background);
   color: var(--fk-text-primary);
   font-family: var(--font-family);
@@ -181,11 +197,17 @@
   margin-left: 240px;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  min-width: 0;
+  transition: margin-left 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ad-topbar {
   height: 58px;
+  min-height: 58px;
+  flex-shrink: 0;
   background-color: #122D29;
   display: flex;
   align-items: center;
@@ -273,7 +295,15 @@
    ============================================================ */
 .ad-content {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
   padding: 30px 36px 60px;
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  width: 100%;
+  min-width: 0;
 }
 
 .ad-header-row {
@@ -995,10 +1025,38 @@
 
 @media (max-width: 900px) {
   .ad-sidebar {
-    display: none;
+    width: 60px !important;
+    min-width: 60px !important;
+  }
+  .ad-sidebar .ad-sidebar-brand-info,
+  .ad-sidebar .ad-sidebar-group-title,
+  .ad-sidebar .ad-sidebar-label,
+  .ad-sidebar .ad-super-badge,
+  .ad-sidebar-signout span {
+    display: none !important;
+  }
+  .ad-sidebar-header-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 16px 8px 10px !important;
+    gap: 10px !important;
+  }
+  .ad-sidebar-header-row .ad-sidebar-brand {
+    flex: none !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  .ad-sidebar-item {
+    justify-content: center !important;
+    padding: 10px 0 !important;
+  }
+  .ad-sidebar-signout {
+    justify-content: center !important;
+    padding: 10px 0 !important;
   }
   .ad-main-wrapper {
-    margin-left: 0;
+    margin-left: 60px !important;
   }
   .ad-analytics-row {
     grid-template-columns: 1fr;
