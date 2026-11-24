@@ -117,21 +117,29 @@ jobs:
             rm -rf "$WEB_STAGE" "$WEB_FAILED" "$WEB_BACKUP"
           fi
 
-          # Ensure swap exists to prevent Linux OOM-killer from terminating build/SSM processes
+          # Clean up any partial/failed swapfile and reclaim host disk space
+          swapoff /swapfile 2>/dev/null || true
+          rm -f /swapfile 2>/dev/null || true
+
+          echo "Reclaiming host disk space from old Docker build caches and release directories..."
+          docker builder prune -a -f >/dev/null 2>&1 || true
+          docker image prune -a -f >/dev/null 2>&1 || true
+          rm -rf /opt/flatkart/releases/* 2>/dev/null || true
+          rm -rf /tmp/* /var/tmp/* 2>/dev/null || true
+
+          # Check available disk space before optional swap allocation
+          FREE_DISK_MB=$(df -m / | awk 'NR==2 {print $4}')
+          echo "Available disk space after cleanup: ${FREE_DISK_MB:-0} MB"
+
+          # Allocate swap only if ample disk space exists (> 2.5GB free), never fail deployment
           CURRENT_SWAP=$(free -m | awk '/^Swap:/ {print $2}')
-          if [ "${CURRENT_SWAP:-0}" -lt 1024 ]; then
-            if [ ! -f /swapfile ]; then
-              echo "Configuring 2GB swapfile for build headroom..."
-              fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048
-              chmod 600 /swapfile
-              mkswap /swapfile
-            fi
+          if [ "${CURRENT_SWAP:-0}" -lt 512 ] && [ "${FREE_DISK_MB:-0}" -gt 2500 ]; then
+            echo "Configuring 1GB swapfile for build headroom..."
+            (fallocate -l 1024M /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=1024 2>/dev/null) || true
+            chmod 600 /swapfile 2>/dev/null || true
+            mkswap /swapfile 2>/dev/null || true
             swapon /swapfile 2>/dev/null || true
           fi
-
-          # Reclaim builder cache and prune old dangling images
-          docker builder prune -f >/dev/null 2>&1 || true
-          docker image prune -f >/dev/null 2>&1 || true
 
           echo "Production services are healthy."
 
