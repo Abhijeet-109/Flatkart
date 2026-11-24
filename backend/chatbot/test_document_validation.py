@@ -23,14 +23,18 @@ class DocumentValidationTests(unittest.TestCase):
         return path
 
     def test_accepts_pdf_signature(self):
+        from pypdf import PdfWriter
         path = self.fixture_path("valid.pdf")
-        path.write_bytes(b"%PDF-1.7\nminimal test fixture")
+        writer = PdfWriter()
+        writer.add_blank_page(width=72, height=72)
+        with path.open("wb") as f:
+            writer.write(f)
         validate_document_file(path)
 
     def test_rejects_empty_or_invalid_pdf(self):
         path = self.fixture_path("invalid.pdf")
         path.write_bytes(b"not a PDF")
-        with self.assertRaisesRegex(ValueError, "PDF signature"):
+        with self.assertRaisesRegex(ValueError, "Invalid PDF file"):
             validate_document_file(path)
 
         path.write_bytes(b"")
@@ -47,14 +51,14 @@ class DocumentValidationTests(unittest.TestCase):
     def test_rejects_bad_docx_archives_and_traversal_entries(self):
         path = self.fixture_path("invalid.docx")
         path.write_bytes(b"not a zip archive")
-        with self.assertRaisesRegex(ValueError, "DOCX archive"):
+        with self.assertRaisesRegex(ValueError, "Invalid document archive"):
             validate_document_file(path)
 
         with zipfile.ZipFile(path, "w") as archive:
             archive.writestr("[Content_Types].xml", "<Types/>")
             archive.writestr("word/document.xml", "<document/>")
             archive.writestr("../outside.xml", "bad")
-        with self.assertRaisesRegex(ValueError, "unsafe entry"):
+        with self.assertRaisesRegex(ValueError, "Unsafe document archive entry"):
             validate_document_file(path)
 
     def test_rejects_highly_compressed_docx_content(self):

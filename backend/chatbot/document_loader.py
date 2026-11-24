@@ -1,7 +1,11 @@
+import logging
 import os
 from pathlib import Path
 
 from langchain_unstructured import UnstructuredLoader
+from pypdf import PdfReader
+
+logger = logging.getLogger(__name__)
 
 SUPPORTED_EXTENSIONS = {
     ".pdf",
@@ -28,6 +32,25 @@ SUPPORTED_EXTENSIONS = {
 }
 
 
+def _load_pdf_with_pypdf(path: Path) -> list[dict]:
+    reader = PdfReader(str(path))
+    documents = []
+
+    for page_num, page in enumerate(reader.pages, start=1):
+        text = (page.extract_text() or "").strip()
+        if not text:
+            continue
+        documents.append({
+            "page_content": text,
+            "metadata": {
+                "source": os.path.basename(path),
+                "page": page_num,
+            },
+        })
+
+    return documents
+
+
 def load_document(file_path):
     path = Path(file_path)
 
@@ -43,27 +66,54 @@ def load_document(file_path):
             f"Unsupported file format: {extension}"
         )
 
-    loader = UnstructuredLoader(
-    file_path=str(path),
-    strategy="fast",
-    )
-
-    loaded_documents = loader.load()
     documents = []
 
-    for document in loaded_documents:
-        text = document.page_content.strip()
+    # For PDFs, first attempt fast and resilient text extraction via pypdf
+    if extension == ".pdf":
+        try:
+            documents = _load_pdf_with_pypdf(path)
+        except Exception as exc:
+            logger.warning(
+                "pypdf extraction failed for %s (%s). Falling back to UnstructuredLoader.",
+                path.name,
+                exc,
+            )
 
-        if not text:
-            continue
+    # If non-PDF or if pypdf extracted no text (e.g. scanned PDF), use UnstructuredLoader
+    if not documents:
+        try:
+            loader = UnstructuredLoader(
+                file_path=str(path),
+                strategy="fast",
+            )
+            loaded_documents = loader.load()
 
-        metadata = dict(document.metadata)
-        metadata["source"] = os.path.basename(path)
+            for document in loaded_documents:
+                text = document.page_content.strip()
+                if not text:
+                    continue
 
-        documents.append({
-            "page_content": text,
-            "metadata": metadata,
-        })
+                metadata = dict(document.metadata)
+                metadata["source"] = os.path.basename(path)
+
+                documents.append({
+                    "page_content": text,
+                    "metadata": metadata,
+                })
+        except Exception as exc:
+            logger.warning(
+                "UnstructuredLoader extraction failed for %s (%s: %s).",
+                path.name,
+                type(exc).__name__,
+                exc,
+            )
+
+    # Final safety fallback for PDF if unstructured also returned nothing
+    if extension == ".pdf" and not documents:
+        try:
+            documents = _load_pdf_with_pypdf(path)
+        except Exception as exc:
+            logger.error("pypdf final fallback failed for %s: %s", path.name, exc)
 
     if not documents:
         raise ValueError(
