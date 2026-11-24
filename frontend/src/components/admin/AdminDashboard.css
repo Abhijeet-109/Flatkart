@@ -1025,8 +1025,9 @@ body:has(.ad-layout) {
 
 @media (max-width: 900px) {
   .ad-sidebar {
-    width: 60px !important;
-    min-width: 60px !important;
+    width: 72px !important;
+    min-width: 72px !important;
+    padding: 18px 10px !important;
   }
   .ad-sidebar .ad-sidebar-brand-info,
   .ad-sidebar .ad-sidebar-group-title,
@@ -1056,7 +1057,7 @@ body:has(.ad-layout) {
     padding: 10px 0 !important;
   }
   .ad-main-wrapper {
-    margin-left: 60px !important;
+    margin-left: 72px !important;
   }
   .ad-analytics-row {
     grid-template-columns: 1fr;
@@ -1222,8 +1223,9 @@ body:has(.ad-layout) {
   display: none;
 }
 .ad-sidebar-collapsed {
-  width: 60px !important;
-  min-width: 60px !important;
+  width: 72px !important;
+  min-width: 72px !important;
+  padding: 18px 10px !important;
 }
 /* Brand & Toggle Header Row */
 .ad-sidebar-header-row {
@@ -1286,8 +1288,9 @@ body:has(.ad-layout) {
 .ad-main-wrapper {
   transition: margin-left 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.ad-layout:has(.ad-sidebar-collapsed) .ad-main-wrapper {
-  margin-left: 60px;
+.ad-layout:has(.ad-sidebar-collapsed) .ad-main-wrapper,
+.hd-collapsed .ad-main-wrapper {
+  margin-left: 72px !important;
 }
 
 /* ── Topbar Profile Spacing Fix ── */

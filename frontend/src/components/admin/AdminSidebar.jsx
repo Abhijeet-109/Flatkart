@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   LayoutDashboard, Users, Building2, UserCheck, ShieldAlert,
   FileText, GitCompare, Bot, LogOut, ShoppingCart, ShoppingBag,
@@ -7,9 +7,15 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-export function AdminSidebar({ currentView = 'store-dashboard', onSelectView, isSuperAdmin = false, onNavigate }) {
+export function AdminSidebar({
+  currentView = 'store-dashboard',
+  onSelectView,
+  isSuperAdmin = false,
+  onNavigate,
+  collapsed = false,
+  setCollapsed,
+}) {
   const { logout } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
 
   const handleSignOut = () => {
     logout();
@@ -21,19 +27,24 @@ export function AdminSidebar({ currentView = 'store-dashboard', onSelectView, is
     const isActive = currentView === view;
     return (
       <button
-        className={`ad-sidebar-item ${isActive ? 'active' : ''} ${collapsed ? 'collapsed' : ''}`}
+        type="button"
+        className={`hd-sidebar-item ${isActive ? 'active' : ''} ${collapsed ? 'collapsed' : ''}`}
         onClick={() => onSelectView(view)}
         title={collapsed ? label : undefined}
       >
-        <Icon size={17} strokeWidth={2} />
-        {!collapsed && <span className="ad-sidebar-label">{label}</span>}
-        {!collapsed && superAdminOnly && <span className="ad-super-badge">Super</span>}
+        <Icon size={18} strokeWidth={1.8} style={{ flexShrink: 0 }} />
+        {!collapsed && <span className="hd-sidebar-label">{label}</span>}
+        {!collapsed && superAdminOnly && (
+          <span className="hd-sidebar-badge" style={{ backgroundColor: '#C2A15A', color: '#183A34', fontWeight: 800 }}>
+            SUPER
+          </span>
+        )}
       </button>
     );
   };
 
   return (
-    <aside className={`ad-sidebar ${collapsed ? 'ad-sidebar-collapsed' : ''}`}>
+    <aside className={`hd-sidebar ${collapsed ? 'hd-sidebar-collapsed' : ''}`}>
       {/* Brand & Toggle Header Row */}
       <div className={`ad-sidebar-header-row ${collapsed ? 'collapsed' : ''}`}>
         <div
@@ -46,16 +57,17 @@ export function AdminSidebar({ currentView = 'store-dashboard', onSelectView, is
           <ShoppingCart size={22} strokeWidth={2.4} color="#FFFFFF" style={{ flexShrink: 0 }} />
           {!collapsed && (
             <div className="ad-sidebar-brand-info">
-              <span className="ad-sidebar-brand-name">Flatkart</span>
-              <span className="ad-sidebar-brand-badge">{isSuperAdmin ? 'Super Admin' : 'Admin'}</span>
+              <span className="ad-sidebar-brand-name">FLATKART</span>
+              <span className="ad-sidebar-brand-badge">{isSuperAdmin ? 'SUPER ADMIN' : 'ADMIN'}</span>
             </div>
           )}
         </div>
 
         {/* Toggle Button */}
         <button
+          type="button"
           className={`ad-sidebar-toggle ${collapsed ? 'collapsed' : 'expanded'}`}
-          onClick={() => setCollapsed(c => !c)}
+          onClick={() => setCollapsed && setCollapsed(!collapsed)}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
@@ -63,10 +75,10 @@ export function AdminSidebar({ currentView = 'store-dashboard', onSelectView, is
         </button>
       </div>
 
-      <nav className="ad-sidebar-nav">
-        {/* WORKSPACE - FIRST */}
-        <div className="ad-sidebar-group">
-          {!collapsed && <div className="ad-sidebar-group-title">Workspace</div>}
+      <nav className="hd-sidebar-nav">
+        {/* WORKSPACE */}
+        <div className="hd-sidebar-group">
+          {!collapsed && <div className="hd-sidebar-section-title">WORKSPACE</div>}
           <NavItem view="overview" icon={LayoutDashboard} label="Overview" />
           <NavItem view="users" icon={Users} label="Manage Users" />
           <NavItem view="departments" icon={Building2} label="Manage Departments" />
@@ -77,9 +89,9 @@ export function AdminSidebar({ currentView = 'store-dashboard', onSelectView, is
           <NavItem view="analytics" icon={GitCompare} label="Redirection Analytics" />
         </div>
 
-        {/* STORE MANAGEMENT - SECOND */}
-        <div className="ad-sidebar-group">
-          {!collapsed && <div className="ad-sidebar-group-title">Store Management</div>}
+        {/* STORE MANAGEMENT */}
+        <div className="hd-sidebar-group" style={{ marginTop: 14 }}>
+          {!collapsed && <div className="hd-sidebar-section-title">STORE MANAGEMENT</div>}
           <NavItem view="store-dashboard" icon={BarChart3} label="Store Dashboard" />
           <NavItem view="orders" icon={ShoppingBag} label="Orders & Shipments" />
           <NavItem view="inventory" icon={Package} label="Inventory" />
@@ -91,9 +103,9 @@ export function AdminSidebar({ currentView = 'store-dashboard', onSelectView, is
         </div>
       </nav>
 
-      <div className="ad-sidebar-footer">
-        <button className="ad-sidebar-signout" onClick={handleSignOut} title="Sign out">
-          <LogOut size={17} style={{ flexShrink: 0 }} />
+      <div className="hd-sidebar-footer">
+        <button type="button" className="hd-sidebar-logout" onClick={handleSignOut} title="Sign out">
+          <LogOut size={18} style={{ flexShrink: 0 }} />
           {!collapsed && <span>Sign out</span>}
         </button>
       </div>
